@@ -35,7 +35,7 @@ public class PasswordUtils {
         }
 
         // Check if password has number
-        if (!password.matches(".*\\\\d+.*")) {
+        if (!password.matches(".*\\d+.*")) {
             throw new PasswordNoNumberCharacterException();
         }
 
