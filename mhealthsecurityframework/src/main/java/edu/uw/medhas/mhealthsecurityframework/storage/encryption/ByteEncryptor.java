@@ -61,6 +61,29 @@ public class ByteEncryptor {
         }
     }
 
+    public static byte[] encrypt(byte[] plainText, String key) {
+        try {
+            final IvParameterSpec ivParameterSpec = generateIvParameterSpec();
+
+            final SecretKeySpec secretKeySpec = generateKeySpec(key);
+
+            final Cipher cipher = Cipher.getInstance(sTransformation);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
+            final byte[] cipherText = cipher.doFinal(plainText);
+
+            final byte[] ivAndCipherText = new byte[sIvLength + cipherText.length];
+            System.arraycopy(ivParameterSpec.getIV(), 0, ivAndCipherText, 0, sIvLength);
+            System.arraycopy(cipherText, 0, ivAndCipherText, sIvLength, cipherText.length);
+
+            return ivAndCipherText;
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException |
+                InvalidAlgorithmParameterException | InvalidKeyException | BadPaddingException |
+                IllegalBlockSizeException ex) {
+            ex.printStackTrace();
+            throw new EncryptionException();
+        }
+    }
+
     public static byte[] decrypt(byte[] ivAndCipherText, Context context) {
         try {
             final byte[] iv = new byte[sIvLength];
@@ -82,29 +105,6 @@ public class ByteEncryptor {
                 | BadPaddingException | IllegalBlockSizeException ex) {
             ex.printStackTrace();
             throw new DecryptionException();
-        }
-    }
-
-    public static byte[] encrypt(byte[] plainText, String key) {
-        try {
-            final IvParameterSpec ivParameterSpec = generateIvParameterSpec();
-
-            final SecretKeySpec secretKeySpec = generateKeySpec(key);
-
-            final Cipher cipher = Cipher.getInstance(sTransformation);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
-            final byte[] cipherText = cipher.doFinal(plainText);
-
-            final byte[] ivAndCipherText = new byte[sIvLength + cipherText.length];
-            System.arraycopy(ivParameterSpec.getIV(), 0, ivAndCipherText, 0, sIvLength);
-            System.arraycopy(cipherText, 0, ivAndCipherText, sIvLength, cipherText.length);
-
-            return ivAndCipherText;
-        } catch (UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException |
-                InvalidAlgorithmParameterException | InvalidKeyException | BadPaddingException |
-                 IllegalBlockSizeException ex) {
-            ex.printStackTrace();
-            throw new EncryptionException();
         }
     }
 

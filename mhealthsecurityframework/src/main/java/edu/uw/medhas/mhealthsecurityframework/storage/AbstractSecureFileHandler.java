@@ -1,7 +1,6 @@
 package edu.uw.medhas.mhealthsecurityframework.storage;
 
 import android.content.Context;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayInputStream;
@@ -21,7 +20,7 @@ import edu.uw.medhas.mhealthsecurityframework.storage.exception.SerializationExc
  * Created by medhas on 5/18/18.
  */
 
-public abstract class AbstractSecureFileHandler {
+public class AbstractSecureFileHandler {
     private final String key = "rAnD0M_K3Y_S1MuLaT!0N";
 
     private final Context mContext;
