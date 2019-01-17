@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <item android:title="Password">
+        <menu>
+            <item
+                android:id="@+id/nav_password"
+                android:title="Password Strength Checker" />
+        </menu>
+    </item>
+
+    <item android:title="Cache Storage">
+        <menu>
+            <item
+                android:id="@+id/nav_cache_serializable"
+                android:title="Serializable" />
+
+            <item
+                android:id="@+id/nav_cache_annotation"
+                android:title="Annotation" />
+        </menu>
+    </item>
+
+    <item android:title="Internal Storage">
+        <menu>
+            <item
+                android:id="@+id/nav_internal_serializable"
+                android:title="Serializable" />
+
+            <item
+                android:id="@+id/nav_internal_annotation"
+                android:title="Annotation" />
+        </menu>
+    </item>
+
+    <item android:title="External Storage">
+        <menu>
+            <item
+                android:id="@+id/nav_external_serializable"
+                android:title="Serializable" />
+
+            <item
+                android:id="@+id/nav_external_annotation"
+                android:title="Annotation" />
+        </menu>
+    </item>
+
+</menu>
