@@ -18,7 +18,7 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Cache Storage - Serializable"
+            android:text="Database Storage - TypeConverter"
             android:textSize="26dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -33,21 +33,49 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/cacSlzSensitiveInp"
+            android:id="@+id/dbTcSensitiveIntInp"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:hint="Some Sensitive Data"
+            android:hint="Some Sensitive Integer Data"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/dbTcSensitiveLongInp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="Some Sensitive Long Data"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/dbTcSensitiveFloatInp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="Some Sensitive Float Data"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/dbTcSensitiveDoubleInp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="Some Sensitive Double Data"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/dbTcSensitiveStringInp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="Some Sensitive String Data"
             android:inputType="text" />
 
         <Button
-            android:id="@+id/cacSlzStore"
+            android:id="@+id/dbTcStore"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Store"
             android:layout_marginBottom="60dp" />
 
         <TextView
-            android:id="@+id/cacSlzSensitiveOp"
+            android:id="@+id/dbTcSensitiveOp"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textSize="17dp"
@@ -57,7 +85,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/cacSlzRetrieve"
+            android:id="@+id/dbTcRetrieve"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Retrieve"

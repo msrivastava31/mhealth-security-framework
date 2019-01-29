@@ -18,8 +18,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Date;
+
 import edu.uw.medhas.mhealthsecurityframework.model.SecureAnnotatedModel;
 import edu.uw.medhas.mhealthsecurityframework.model.SecureSerializableModel;
+import edu.uw.medhas.mhealthsecurityframework.model.secureDatabaseModel.entity.SecureDatabase;
+import edu.uw.medhas.mhealthsecurityframework.model.secureDatabaseModel.entity.SensitiveDbData;
 import edu.uw.medhas.mhealthsecurityframework.password.PasswordUtils;
 import edu.uw.medhas.mhealthsecurityframework.password.exception.PasswordNoLowerCaseCharacterException;
 import edu.uw.medhas.mhealthsecurityframework.password.exception.PasswordNoNumberCharacterException;
@@ -27,6 +31,11 @@ import edu.uw.medhas.mhealthsecurityframework.password.exception.PasswordNoSpeci
 import edu.uw.medhas.mhealthsecurityframework.password.exception.PasswordNoUpperCaseCharacterException;
 import edu.uw.medhas.mhealthsecurityframework.password.exception.PasswordTooShortException;
 import edu.uw.medhas.mhealthsecurityframework.storage.cache.SecureCacheHandler;
+import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureDouble;
+import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureFloat;
+import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureInteger;
+import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureLong;
+import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureString;
 import edu.uw.medhas.mhealthsecurityframework.storage.external.SecureExternalFileHandler;
 import edu.uw.medhas.mhealthsecurityframework.storage.internal.SecureInternalFileHandler;
 
@@ -36,6 +45,7 @@ public class MainActivity extends AppCompatActivity
     private SecureInternalFileHandler mSecureInternalFileHandler = null;
     private SecureExternalFileHandler mSecureExternalFileHandler = null;
     private SecureCacheHandler mSecureCacheHandler = null;
+    private SecureDatabase mSecureDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +66,7 @@ public class MainActivity extends AppCompatActivity
         mSecureInternalFileHandler = new SecureInternalFileHandler(getBaseContext());
         mSecureExternalFileHandler = new SecureExternalFileHandler(getBaseContext());
         mSecureCacheHandler = new SecureCacheHandler(getBaseContext());
+        mSecureDatabase = App.get().getDb();
     }
 
     @Override
@@ -90,6 +101,8 @@ public class MainActivity extends AppCompatActivity
             newView = inflater.inflate(R.layout.content_extsto_slz, null);
         } else if (id == R.id.nav_external_annotation) {
             newView = inflater.inflate(R.layout.content_extsto_ano, null);
+        } else if (id == R.id.nav_db_tc) {
+            newView = inflater.inflate(R.layout.content_dbsto_tc, null);
         }
 
         LinearLayout mainLayout = (LinearLayout) findViewById(R.id.main_container);
@@ -329,6 +342,77 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
             });
+        } else if (id == R.id.nav_db_tc) {
+            final EditText editTextIntInp = (EditText) findViewById(R.id.dbTcSensitiveIntInp);
+            final EditText editTextLongInp = (EditText) findViewById(R.id.dbTcSensitiveLongInp);
+            final EditText editTextFloatInp = (EditText) findViewById(R.id.dbTcSensitiveFloatInp);
+            final EditText editTextDoubleInp = (EditText) findViewById(R.id.dbTcSensitiveDoubleInp);
+            final EditText editTextStringInp = (EditText) findViewById(R.id.dbTcSensitiveStringInp);
+
+            final Button btnStore = (Button) findViewById(R.id.dbTcStore);
+            final TextView editTextOp = (TextView) findViewById(R.id.dbTcSensitiveOp);
+            final Button btnRetrieve = (Button) findViewById(R.id.dbTcRetrieve);
+
+            btnStore.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Database Insert
+                    try {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                SensitiveDbData object = new SensitiveDbData();
+                                object.setIntValue(new SecureInteger(
+                                        Integer.valueOf(editTextIntInp.getText().toString())));
+                                object.setLongValue(new SecureLong(
+                                        Long.valueOf(editTextLongInp.getText().toString())));
+                                object.setFloatValue(new SecureFloat(
+                                        Float.valueOf(editTextFloatInp.getText().toString())));
+                                object.setDoubleValue(new SecureDouble(
+                                        Double.valueOf(editTextDoubleInp.getText().toString())));
+                                object.setStringValue(new SecureString(
+                                        editTextStringInp.getText().toString()));
+                                object.setSimpleStr(editTextStringInp.getText().toString());
+
+                                Long id = mSecureDatabase.daoAccess().insertSingle(object);
+
+                                editTextOp.setText(id.toString());
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+            btnRetrieve.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Database Fetch
+                    try {
+                        runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                String id = (String) editTextOp.getText();
+                                SensitiveDbData object = mSecureDatabase.daoAccess().fetchOnebyId(Integer.valueOf(id));
+                                editTextOp.setText(
+                                          "Integer: " + String.valueOf(object.getIntValue().getValue())
+                                        + ", Long: " +String.valueOf(object.getLongValue().getValue())
+                                        + ", Float: " + String.valueOf(object.getFloatValue().getValue())
+                                        + ", Double: " + String.valueOf(object.getDoubleValue().getValue())
+                                        + ", String: " + object.getStringValue().getValue()
+                                        + ", SimString: " + object.getSimpleStr());
+
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

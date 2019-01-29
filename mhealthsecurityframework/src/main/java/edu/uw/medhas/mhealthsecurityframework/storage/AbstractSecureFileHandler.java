@@ -21,7 +21,7 @@ import edu.uw.medhas.mhealthsecurityframework.storage.exception.SerializationExc
  */
 
 public class AbstractSecureFileHandler {
-    private final String key = "rAnD0M_K3Y_S1MuLaT!0N";
+    public static final String key = "rAnD0M_K3Y_S1MuLaT!0N";
 
     private final Context mContext;
     private final ObjectMapper mObjectMapper;

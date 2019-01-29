@@ -47,4 +47,12 @@
         </menu>
     </item>
 
+    <item android:title="Database Storage">
+        <menu>
+            <item
+                android:id="@+id/nav_db_tc"
+                android:title="DB TypeConverter" />
+        </menu>
+    </item>
+
 </menu>
