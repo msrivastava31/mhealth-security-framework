@@ -23,42 +23,37 @@ import javax.crypto.SecretKey;
  */
 
 public class KeyManager {
-    private static final String sKeyStoreInstance = "AndroidKeyStore";
+    private static final String sAndroidKeyStore = "AndroidKeyStore";
 
-    public static SecretKey getKey(Context context) throws KeyStoreException, CertificateException,
+    public static SecretKey getKey(String keyAlias) throws KeyStoreException, CertificateException,
             NoSuchAlgorithmException, IOException, UnrecoverableEntryException, NoSuchProviderException,
             InvalidAlgorithmParameterException {
-        KeyStore keyStore = KeyStore.getInstance(sKeyStoreInstance);
+
+        KeyStore keyStore = KeyStore.getInstance(sAndroidKeyStore);
         keyStore.load(null);
 
-        final String applicationName = getApplicationName(context);
+        final KeyStore.Entry keyEntry = keyStore.getEntry(keyAlias, null);
 
-        final SecretKeyEntry secretKeyEntry = (SecretKeyEntry) keyStore.getEntry(applicationName,
-                null);
+        SecretKey secretKey = null;
 
-        if (secretKeyEntry == null) {
-            final KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,
-                    sKeyStoreInstance);
-            final KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec.Builder(applicationName,
+        if (keyEntry == null) {
+            final KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec.Builder(keyAlias,
                     KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                    .setDigests(KeyProperties.DIGEST_SHA256)
                     .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                    .setUserAuthenticationRequired(false)
+                    .setKeySize(128)
                     .build();
 
-            keyGenerator.init(keyGenParameterSpec);
+            final KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,
+                    sAndroidKeyStore);
 
-            return keyGenerator.generateKey();
+            keyGenerator.init(keyGenParameterSpec);
+            secretKey = keyGenerator.generateKey();
+        } else {
+            secretKey = ((SecretKeyEntry) keyEntry).getSecretKey();
         }
 
-        return secretKeyEntry.getSecretKey();
-    }
-
-    private static String getApplicationName(Context context) {
-        ApplicationInfo applicationInfo = context.getApplicationInfo();
-        int applicationLabelResId = applicationInfo.labelRes;
-
-        return applicationLabelResId == 0 ? applicationInfo.nonLocalizedLabel.toString()
-                                            : context.getString(applicationLabelResId);
+        return secretKey;
     }
 }

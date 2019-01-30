@@ -22,6 +22,11 @@ public class SecureCacheHandler extends AbstractSecureFileHandler {
         super(context);
     }
 
+    @Override
+    protected String getKeyAlias() {
+        return "mhealth-security-framework-cache-storage";
+    }
+
     public <S> void writeData(S secureObj, String filename) {
         final SecureFile secureFile = new SecureFile();
         secureFile.setFilename(filename);

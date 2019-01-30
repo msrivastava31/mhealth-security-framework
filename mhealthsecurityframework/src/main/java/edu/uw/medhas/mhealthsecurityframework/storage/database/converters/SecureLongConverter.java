@@ -4,7 +4,6 @@ import android.arch.persistence.room.TypeConverter;
 
 import java.nio.ByteBuffer;
 
-import edu.uw.medhas.mhealthsecurityframework.storage.AbstractSecureFileHandler;
 import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureLong;
 import edu.uw.medhas.mhealthsecurityframework.storage.encryption.ByteEncryptor;
 
@@ -12,7 +11,7 @@ import edu.uw.medhas.mhealthsecurityframework.storage.encryption.ByteEncryptor;
  * Created by medhasrivastava on 1/21/19.
  */
 
-public class SecureLongConverter {
+public class SecureLongConverter extends AbstractSecureConverter {
     @TypeConverter
     public byte[] fromSecureLongToEncryptedBytes(SecureLong value){
         if (value == null) {
@@ -20,7 +19,7 @@ public class SecureLongConverter {
         }
 
         final byte[] objectAsBytes = ByteBuffer.allocate(8).putLong(value.getValue()).array();
-        return ByteEncryptor.encrypt(objectAsBytes, AbstractSecureFileHandler.key);
+        return ByteEncryptor.encrypt(keyAlias, objectAsBytes);
     }
 
     @TypeConverter
@@ -29,8 +28,7 @@ public class SecureLongConverter {
             return null;
         }
 
-        final Long decryptType = ByteBuffer.wrap(ByteEncryptor.decrypt(encryptedValue,
-                AbstractSecureFileHandler.key)).getLong();
+        final Long decryptType = ByteBuffer.wrap(ByteEncryptor.decrypt(keyAlias, encryptedValue)).getLong();
         return new SecureLong(decryptType);
     }
 }

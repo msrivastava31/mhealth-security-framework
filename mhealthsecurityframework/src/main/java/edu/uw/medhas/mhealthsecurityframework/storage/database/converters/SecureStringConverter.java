@@ -12,7 +12,7 @@ import edu.uw.medhas.mhealthsecurityframework.storage.encryption.ByteEncryptor;
  * Created by medhasrivastava on 1/21/19.
  */
 
-public class SecureStringConverter {
+public class SecureStringConverter extends AbstractSecureConverter {
     @TypeConverter
     public byte[] fromSecureStringToEncryptedBytes(SecureString value){
         if (value == null) {
@@ -20,7 +20,7 @@ public class SecureStringConverter {
         }
 
         final byte[] objectAsBytes = value.getValue().getBytes(StandardCharsets.UTF_8);
-        return ByteEncryptor.encrypt(objectAsBytes, AbstractSecureFileHandler.key);
+        return ByteEncryptor.encrypt(keyAlias, objectAsBytes);
     }
 
     @TypeConverter
@@ -29,8 +29,8 @@ public class SecureStringConverter {
             return null;
         }
 
-        final String decryptType = new String(ByteEncryptor.decrypt(encryptedValue,
-                AbstractSecureFileHandler.key), StandardCharsets.UTF_8);
+        final String decryptType = new String(ByteEncryptor.decrypt(keyAlias, encryptedValue),
+                StandardCharsets.UTF_8);
         return new SecureString(decryptType);
     }
 }

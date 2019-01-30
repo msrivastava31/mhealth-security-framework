@@ -20,6 +20,11 @@ public class SecureInternalFileHandler extends AbstractSecureFileHandler {
         super(context);
     }
 
+    @Override
+    protected String getKeyAlias() {
+        return "mhealth-security-framework-internal-storage";
+    }
+
     public <S> void writeData(S secureObj, String filename) {
         final SecureFile secureFile = new SecureFile();
         secureFile.setFilename(filename);

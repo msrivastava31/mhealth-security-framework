@@ -23,6 +23,11 @@ public class SecureExternalFileHandler extends AbstractSecureFileHandler {
         super(context);
     }
 
+    @Override
+    protected String getKeyAlias() {
+        return "mhealth-security-framework-external-storage";
+    }
+
     public <S> void writeData(S secureObj, String environmentDir, String filename) {
         if (!getContext().getExternalFilesDir(environmentDir).exists()) {
             throw new InvalidEnvironmentDirectoryException();

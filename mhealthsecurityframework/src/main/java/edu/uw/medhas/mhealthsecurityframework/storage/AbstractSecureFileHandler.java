@@ -20,16 +20,13 @@ import edu.uw.medhas.mhealthsecurityframework.storage.exception.SerializationExc
  * Created by medhas on 5/18/18.
  */
 
-public class AbstractSecureFileHandler {
-    public static final String key = "rAnD0M_K3Y_S1MuLaT!0N";
-
+public abstract class AbstractSecureFileHandler {
     private final Context mContext;
     private final ObjectMapper mObjectMapper;
 
     public AbstractSecureFileHandler(Context context) {
         mContext = context;
         mObjectMapper = new ObjectMapper();
-
     }
 
     protected Context getContext() {
@@ -39,6 +36,8 @@ public class AbstractSecureFileHandler {
     protected ObjectMapper getObjectMapper() {
         return mObjectMapper;
     }
+
+    protected abstract String getKeyAlias();
 
     protected <S> byte[] getSecureObjAsBytes(S secureObj, SecureFile secureFile) {
         final byte[] objectAsBytes;
@@ -77,7 +76,7 @@ public class AbstractSecureFileHandler {
         if (secureObj instanceof SecureSerializable
                 || secureObj.getClass().isAnnotationPresent(SecureData.class)) {
             secureFile.setEncryptedData(true);
-            return ByteEncryptor.encrypt(objectAsBytes, key);
+            return ByteEncryptor.encrypt(getKeyAlias(), objectAsBytes);
         }
 
         return objectAsBytes;
@@ -85,7 +84,7 @@ public class AbstractSecureFileHandler {
 
     protected <S> S readObjFromBytes(Class<S> clazz, byte[] secureObjectAsBytes, SecureFile secureFile) {
         final byte[] unsecureObjectAsBytes = secureFile.isEncryptedData()
-                                                ? ByteEncryptor.decrypt(secureObjectAsBytes, key)
+                                                ? ByteEncryptor.decrypt(getKeyAlias(), secureObjectAsBytes)
                                                 : secureObjectAsBytes;
 
         if (secureFile.isJsonData()) {

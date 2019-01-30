@@ -18,8 +18,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Date;
-
 import edu.uw.medhas.mhealthsecurityframework.model.SecureAnnotatedModel;
 import edu.uw.medhas.mhealthsecurityframework.model.SecureSerializableModel;
 import edu.uw.medhas.mhealthsecurityframework.model.secureDatabaseModel.entity.SecureDatabase;

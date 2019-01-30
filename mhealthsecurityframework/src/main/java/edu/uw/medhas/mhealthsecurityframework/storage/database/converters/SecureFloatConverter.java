@@ -4,7 +4,6 @@ import android.arch.persistence.room.TypeConverter;
 
 import java.nio.ByteBuffer;
 
-import edu.uw.medhas.mhealthsecurityframework.storage.AbstractSecureFileHandler;
 import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureFloat;
 import edu.uw.medhas.mhealthsecurityframework.storage.encryption.ByteEncryptor;
 
@@ -12,7 +11,7 @@ import edu.uw.medhas.mhealthsecurityframework.storage.encryption.ByteEncryptor;
  * Created by medhasrivastava on 1/21/19.
  */
 
-public class SecureFloatConverter {
+public class SecureFloatConverter extends AbstractSecureConverter {
     @TypeConverter
     public byte[] fromSecureFloatToEncryptedBytes(SecureFloat value){
         if (value == null) {
@@ -20,7 +19,7 @@ public class SecureFloatConverter {
         }
 
         final byte[] objectAsBytes = ByteBuffer.allocate(4).putFloat(value.getValue()).array();
-        return ByteEncryptor.encrypt(objectAsBytes, AbstractSecureFileHandler.key);
+        return ByteEncryptor.encrypt(keyAlias, objectAsBytes);
     }
 
     @TypeConverter
@@ -29,8 +28,7 @@ public class SecureFloatConverter {
             return null;
         }
 
-        final Float decryptType = ByteBuffer.wrap(ByteEncryptor.decrypt(encryptedValue,
-                AbstractSecureFileHandler.key)).getFloat();
+        final Float decryptType = ByteBuffer.wrap(ByteEncryptor.decrypt(keyAlias, encryptedValue)).getFloat();
         return new SecureFloat(decryptType);
     }
 }
