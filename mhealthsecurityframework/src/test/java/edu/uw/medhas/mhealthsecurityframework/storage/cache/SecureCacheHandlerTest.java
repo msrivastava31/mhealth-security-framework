@@ -11,16 +11,13 @@ import org.junit.rules.TemporaryFolder;
 import java.io.FileNotFoundException;
 import java.util.UUID;
 
-import edu.uw.medhas.mhealthsecurityframework.storage.SecureData;
-import edu.uw.medhas.mhealthsecurityframework.storage.SecureSerializable;
+import edu.uw.medhas.mhealthsecurityframework.storage.metadata.model.SecureData;
+import edu.uw.medhas.mhealthsecurityframework.storage.metadata.model.SecureSerializable;
 import edu.uw.medhas.mhealthsecurityframework.storage.SecureTestData;
 import edu.uw.medhas.mhealthsecurityframework.storage.TestData;
 import edu.uw.medhas.mhealthsecurityframework.storage.TestSerializableData;
-import edu.uw.medhas.mhealthsecurityframework.storage.exception.InvalidEnvironmentDirectoryException;
 import edu.uw.medhas.mhealthsecurityframework.storage.exception.NoDefaultConstructorException;
 import edu.uw.medhas.mhealthsecurityframework.storage.exception.SerializationException;
-import edu.uw.medhas.mhealthsecurityframework.storage.external.ExternalStorageMockContext;
-import edu.uw.medhas.mhealthsecurityframework.storage.external.SecureExternalFileHandler;
 
 /**
  * Created by medhas on 11/3/18.

@@ -14,8 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.UUID;
 
-import edu.uw.medhas.mhealthsecurityframework.storage.SecureData;
-import edu.uw.medhas.mhealthsecurityframework.storage.SecureSerializable;
+import edu.uw.medhas.mhealthsecurityframework.storage.metadata.model.SecureSerializable;
 import edu.uw.medhas.mhealthsecurityframework.storage.SecureTestData;
 import edu.uw.medhas.mhealthsecurityframework.storage.TestData;
 import edu.uw.medhas.mhealthsecurityframework.storage.TestSerializableData;

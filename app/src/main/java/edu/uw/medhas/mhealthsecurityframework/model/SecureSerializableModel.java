@@ -1,6 +1,6 @@
 package edu.uw.medhas.mhealthsecurityframework.model;
 
-import edu.uw.medhas.mhealthsecurityframework.storage.SecureSerializable;
+import edu.uw.medhas.mhealthsecurityframework.storage.metadata.model.SecureSerializable;
 
 /**
  * Created by medhas on 5/29/18.

@@ -1,6 +1,6 @@
 package edu.uw.medhas.mhealthsecurityframework.model;
 
-import edu.uw.medhas.mhealthsecurityframework.storage.SecureData;
+import edu.uw.medhas.mhealthsecurityframework.storage.metadata.model.SecureData;
 
 /**
  * Created by medhas on 5/29/18.

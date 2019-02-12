@@ -1,16 +1,13 @@
 package edu.uw.medhas.mhealthsecurityframework.storage.encryption;
 
-import android.content.Context;
+import android.hardware.fingerprint.FingerprintManager;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 
@@ -20,11 +17,12 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
+import edu.uw.medhas.mhealthsecurityframework.authentication.AuthenticationManager;
+import edu.uw.medhas.mhealthsecurityframework.storage.StorageServiceCallback;
 import edu.uw.medhas.mhealthsecurityframework.storage.exception.DecryptionException;
 import edu.uw.medhas.mhealthsecurityframework.storage.exception.EncryptionException;
-import edu.uw.medhas.mhealthsecurityframework.storage.exception.KeyTooShortException;
+import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultErrorType;
 
 /**
  * Created by medhas on 5/18/18.
@@ -33,6 +31,99 @@ import edu.uw.medhas.mhealthsecurityframework.storage.exception.KeyTooShortExcep
 public class ByteEncryptor {
     private static final String sTransformation = "AES/CBC/PKCS7Padding";
     private static final int sIvLength = 16;
+
+    public static void encrypt(String alias, final byte[] plainText,
+                               AuthenticationManager authenticationManager,
+                               final StorageServiceCallback<byte[]> callback) {
+        try {
+            final SecretKey secretKey = KeyManager.getKey(alias, authenticationManager);
+            final Cipher cipher = Cipher.getInstance(sTransformation);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+
+            final FingerprintManager.CryptoObject cryptoObject = new FingerprintManager.CryptoObject(cipher);
+
+            authenticationManager.performAuthentication(cryptoObject, new EncryptionServiceCallback() {
+                @Override
+                public void onWaitingForAuthentication() {
+                    callback.onWaitingForAuthentication();
+                }
+
+                @Override
+                public void onSuccess(Cipher cipher) {
+                    try {
+                        final byte[] cipherText = cipher.doFinal(plainText);
+
+                        final byte[] ivAndCipherText = new byte[sIvLength + cipherText.length];
+
+                        System.arraycopy(cipher.getIV(), 0, ivAndCipherText, 0, sIvLength);
+                        System.arraycopy(cipherText, 0, ivAndCipherText, sIvLength, cipherText.length);
+
+                        callback.onSuccess(ivAndCipherText);
+                    } catch (BadPaddingException | IllegalBlockSizeException ex) {
+                        ex.printStackTrace();
+                        callback.onFailure(StorageResultErrorType.ENCRYPTION_ERROR);
+                    }
+                }
+
+                @Override
+                public void onFailure(StorageResultErrorType storageResultErrorType) {
+                    callback.onFailure(storageResultErrorType);
+                }
+            });
+        } catch (IOException | CertificateException | UnrecoverableEntryException
+                | NoSuchProviderException | KeyStoreException | NoSuchAlgorithmException
+                | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException ex) {
+            ex.printStackTrace();
+            callback.onFailure(StorageResultErrorType.ENCRYPTION_ERROR);
+        }
+    }
+
+    public static void decrypt(String alias, byte[] ivAndCipherText,
+                               AuthenticationManager authenticationManager,
+                               final StorageServiceCallback<byte[]> callback) {
+        try {
+            final byte[] iv = new byte[sIvLength];
+            System.arraycopy(ivAndCipherText, 0, iv, 0, iv.length);
+            final IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+
+            final SecretKey secretKey = KeyManager.getKey(alias, authenticationManager);
+
+            final byte[] cipherText = new byte[ivAndCipherText.length - sIvLength];
+            System.arraycopy(ivAndCipherText, sIvLength, cipherText, 0, cipherText.length);
+
+            final Cipher cipher = Cipher.getInstance(sTransformation);
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
+
+            final FingerprintManager.CryptoObject cryptoObject = new FingerprintManager.CryptoObject(cipher);
+
+            authenticationManager.performAuthentication(cryptoObject, new EncryptionServiceCallback() {
+                @Override
+                public void onWaitingForAuthentication() {
+                    callback.onWaitingForAuthentication();
+                }
+
+                @Override
+                public void onSuccess(Cipher cipher) {
+                    try {
+                        callback.onSuccess(cipher.doFinal(cipherText));
+                    } catch (BadPaddingException | IllegalBlockSizeException ex) {
+                        ex.printStackTrace();
+                        callback.onFailure(StorageResultErrorType.ENCRYPTION_ERROR);
+                    }
+                }
+
+                @Override
+                public void onFailure(StorageResultErrorType storageResultErrorType) {
+                    callback.onFailure(storageResultErrorType);
+                }
+            });
+        } catch (IOException | CertificateException | UnrecoverableEntryException
+                | NoSuchProviderException | KeyStoreException | NoSuchAlgorithmException
+                | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException ex) {
+            ex.printStackTrace();
+            callback.onFailure(StorageResultErrorType.DECRYPTION_ERROR);
+        }
+    }
 
     public static byte[] encrypt(String alias, byte[] plainText) {
         try {
@@ -84,7 +175,7 @@ public class ByteEncryptor {
         try {
             final IvParameterSpec ivParameterSpec = generateIvParameterSpec();
 
-            final SecretKey secretKey = KeyManager.getKey(alias);
+            final SecretKey secretKey = AuthKeyManager.getKey(alias);
 
             final Cipher cipher = Cipher.getInstance(sTransformation);
 
@@ -111,7 +202,7 @@ public class ByteEncryptor {
             System.arraycopy(ivAndCipherText, 0, iv, 0, iv.length);
             final IvParameterSpec ivParameterSpec = generateIvParameterSpec(iv);
 
-            final SecretKey secretKey = KeyManager.getKey(alias);
+            final SecretKey secretKey = AuthKeyManager.getKey(alias);
 
             byte[] cipherText = new byte[ivAndCipherText.length - sIvLength];
             System.arraycopy(ivAndCipherText, sIvLength, cipherText, 0, cipherText.length);

@@ -5,5 +5,7 @@ package edu.uw.medhas.mhealthsecurityframework.storage.database.converters;
  */
 
 public abstract class AbstractSecureConverter {
-    protected final String keyAlias = "mhealth-security-framework-database-storage";
+    protected String getKeyAlias() {
+        return "mhealth-security-framework-database-storage";
+    }
 }

@@ -18,6 +18,8 @@ import java.security.cert.CertificateException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
+import edu.uw.medhas.mhealthsecurityframework.authentication.AuthenticationManager;
+
 /**
  * Created by medhas on 5/30/18.
  */
@@ -42,6 +44,40 @@ public class KeyManager {
                     .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
                     .setUserAuthenticationRequired(false)
+                    .setKeySize(128)
+                    .build();
+
+            final KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,
+                    sAndroidKeyStore);
+
+            keyGenerator.init(keyGenParameterSpec);
+            secretKey = keyGenerator.generateKey();
+        } else {
+            secretKey = ((SecretKeyEntry) keyEntry).getSecretKey();
+        }
+
+        return secretKey;
+    }
+
+    public static SecretKey getKey(String keyAlias,
+                                   AuthenticationManager authenticationManager)
+            throws KeyStoreException, CertificateException,
+            NoSuchAlgorithmException, IOException, UnrecoverableEntryException, NoSuchProviderException,
+            InvalidAlgorithmParameterException {
+
+        KeyStore keyStore = KeyStore.getInstance(sAndroidKeyStore);
+        keyStore.load(null);
+
+        final KeyStore.Entry keyEntry = keyStore.getEntry(keyAlias, null);
+
+        SecretKey secretKey = null;
+
+        if (keyEntry == null) {
+            final KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec.Builder(keyAlias,
+                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                    .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                    .setUserAuthenticationRequired(authenticationManager.isUserAuthenticationPossible())
                     .setKeySize(128)
                     .build();
 

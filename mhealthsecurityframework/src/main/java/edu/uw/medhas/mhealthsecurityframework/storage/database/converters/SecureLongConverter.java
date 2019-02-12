@@ -3,9 +3,16 @@ package edu.uw.medhas.mhealthsecurityframework.storage.database.converters;
 import android.arch.persistence.room.TypeConverter;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CountDownLatch;
 
+import edu.uw.medhas.mhealthsecurityframework.authentication.BasicAuthenticationManager;
+import edu.uw.medhas.mhealthsecurityframework.storage.StorageServiceCallback;
+import edu.uw.medhas.mhealthsecurityframework.storage.database.model.ConverterEncryptionResult;
 import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureLong;
 import edu.uw.medhas.mhealthsecurityframework.storage.encryption.ByteEncryptor;
+import edu.uw.medhas.mhealthsecurityframework.storage.exception.DecryptionException;
+import edu.uw.medhas.mhealthsecurityframework.storage.exception.EncryptionException;
+import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultErrorType;
 
 /**
  * Created by medhasrivastava on 1/21/19.
@@ -19,7 +26,40 @@ public class SecureLongConverter extends AbstractSecureConverter {
         }
 
         final byte[] objectAsBytes = ByteBuffer.allocate(8).putLong(value.getValue()).array();
-        return ByteEncryptor.encrypt(keyAlias, objectAsBytes);
+
+        final ConverterEncryptionResult converterResult = new ConverterEncryptionResult();
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        ByteEncryptor.encrypt(getKeyAlias(), objectAsBytes, new BasicAuthenticationManager(),
+                new StorageServiceCallback<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] result) {
+                        converterResult.setResult(result);
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void onFailure(StorageResultErrorType storageResultErrorType) {
+                        converterResult.setErrorType(storageResultErrorType);
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void onWaitingForAuthentication() {
+
+                    }
+                });
+
+        try {
+            latch.await();
+            if (converterResult.getErrorType().isPresent()) {
+                throw new EncryptionException();
+            }
+            return converterResult.getResult();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new EncryptionException();
+        }
     }
 
     @TypeConverter
@@ -28,7 +68,38 @@ public class SecureLongConverter extends AbstractSecureConverter {
             return null;
         }
 
-        final Long decryptType = ByteBuffer.wrap(ByteEncryptor.decrypt(keyAlias, encryptedValue)).getLong();
-        return new SecureLong(decryptType);
+        final ConverterEncryptionResult converterResult = new ConverterEncryptionResult();
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        ByteEncryptor.decrypt(getKeyAlias(), encryptedValue, new BasicAuthenticationManager(),
+                new StorageServiceCallback<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] result) {
+                        converterResult.setResult(result);
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void onFailure(StorageResultErrorType storageResultErrorType) {
+                        converterResult.setErrorType(storageResultErrorType);
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void onWaitingForAuthentication() {
+                    }
+                });
+
+        try {
+            latch.await();
+            if (converterResult.getErrorType().isPresent()) {
+                throw new DecryptionException();
+            }
+
+            return new SecureLong(ByteBuffer.wrap(converterResult.getResult()).getLong());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new DecryptionException();
+        }
     }
 }

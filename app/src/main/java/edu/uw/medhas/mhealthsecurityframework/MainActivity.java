@@ -7,8 +7,8 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +18,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+
+import edu.uw.medhas.mhealthsecurityframework.activity.SecureActivity;
 import edu.uw.medhas.mhealthsecurityframework.model.SecureAnnotatedModel;
 import edu.uw.medhas.mhealthsecurityframework.model.SecureSerializableModel;
 import edu.uw.medhas.mhealthsecurityframework.model.secureDatabaseModel.entity.SecureDatabase;
@@ -28,26 +35,29 @@ import edu.uw.medhas.mhealthsecurityframework.password.exception.PasswordNoNumbe
 import edu.uw.medhas.mhealthsecurityframework.password.exception.PasswordNoSpecialCharacterException;
 import edu.uw.medhas.mhealthsecurityframework.password.exception.PasswordNoUpperCaseCharacterException;
 import edu.uw.medhas.mhealthsecurityframework.password.exception.PasswordTooShortException;
-import edu.uw.medhas.mhealthsecurityframework.storage.cache.SecureCacheHandler;
 import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureDouble;
 import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureFloat;
 import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureInteger;
 import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureLong;
 import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureString;
-import edu.uw.medhas.mhealthsecurityframework.storage.external.SecureExternalFileHandler;
-import edu.uw.medhas.mhealthsecurityframework.storage.internal.SecureInternalFileHandler;
+import edu.uw.medhas.mhealthsecurityframework.storage.metadata.StorageReadObject;
+import edu.uw.medhas.mhealthsecurityframework.storage.metadata.StorageWriteObject;
+import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResult;
+import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultCallback;
+import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultErrorType;
+import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultSuccess;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends SecureActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private SecureInternalFileHandler mSecureInternalFileHandler = null;
-    private SecureExternalFileHandler mSecureExternalFileHandler = null;
-    private SecureCacheHandler mSecureCacheHandler = null;
     private SecureDatabase mSecureDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.v("MainActivity::onCreate", "Should have init AuthenticationManagerFactory");
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -61,10 +71,27 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mSecureInternalFileHandler = new SecureInternalFileHandler(getBaseContext());
-        mSecureExternalFileHandler = new SecureExternalFileHandler(getBaseContext());
-        mSecureCacheHandler = new SecureCacheHandler(getBaseContext());
         mSecureDatabase = App.get().getDb();
+
+        // Delete keys
+        try {
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+
+            keyStore.deleteEntry("mhealth-security-framework-internal-storage");
+            keyStore.deleteEntry("mhealth-security-framework-external-storage");
+            keyStore.deleteEntry("mhealth-security-framework-database-storage");
+            keyStore.deleteEntry("mhealth-security-framework-cache-storage");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -144,27 +171,54 @@ public class MainActivity extends AppCompatActivity
             btnStore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        final SecureSerializableModel ssm = new SecureSerializableModel(editTextInp.getText().toString());
-                        mSecureCacheHandler.writeData(ssm, "cachestorage-serializable.txt");
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error storing file", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    final StorageWriteObject<SecureSerializableModel> writeObject =
+                            new StorageWriteObject<>("cachestorage-serializable.txt",
+                                    new SecureSerializableModel(editTextInp.getText().toString()));
+                    getSecureCacheHandler().writeData(writeObject,
+                        new StorageResultCallback<StorageResultSuccess>() {
+                            @Override
+                            public void onWaitingForAuthentication() {
+                                editTextOp.setText("Waiting for Authentication");
+                            }
+
+                            @Override
+                            public void onSuccess(StorageResult<StorageResultSuccess> storageResult) {
+                                editTextOp.setText("Successfully stored file");
+                            }
+
+                            @Override
+                            public void onFailure(StorageResultErrorType errorType) {
+                                editTextOp.setText("Error storing file: " + errorType.name());
+                            }
+                        }
+                    );
                 }
             });
 
             btnRetrieve.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        final SecureSerializableModel ssm = mSecureCacheHandler.readData(SecureSerializableModel.class,
-                                "cachestorage-serializable.txt");
-                        editTextOp.setText(ssm.getData());
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error retrieving file", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    final StorageReadObject<SecureSerializableModel> readObject =
+                            new StorageReadObject<>("cachestorage-serializable.txt",
+                                    SecureSerializableModel.class);
+                    getSecureCacheHandler().readData(readObject,
+                        new StorageResultCallback<SecureSerializableModel>() {
+                            @Override
+                            public void onWaitingForAuthentication() {
+                                editTextOp.setText("Waiting for Authentication");
+                            }
+
+                            @Override
+                            public void onSuccess(StorageResult<SecureSerializableModel> storageResult) {
+                                editTextOp.setText(storageResult.getResult().getData());
+                            }
+
+                            @Override
+                            public void onFailure(StorageResultErrorType errorType) {
+                                editTextOp.setText("Error retrieving file: " + errorType.name());
+                            }
+                        }
+                    );
                 }
             });
 
@@ -178,28 +232,57 @@ public class MainActivity extends AppCompatActivity
             btnStore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        final SecureAnnotatedModel ssm = new SecureAnnotatedModel();
-                        ssm.setData(editTextInp.getText().toString());
-                        mSecureCacheHandler.writeData(ssm, "cachestorage-annotation.txt");
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error storing file", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    final SecureAnnotatedModel sam = new SecureAnnotatedModel();
+                    sam.setData(editTextInp.getText().toString());
+
+                    final StorageWriteObject<SecureAnnotatedModel> writeObject =
+                            new StorageWriteObject<>("cachestorage-annotation.txt", sam);
+
+                    getSecureCacheHandler().writeData(writeObject,
+                            new StorageResultCallback<StorageResultSuccess>() {
+                                @Override
+                                public void onWaitingForAuthentication() {
+                                    editTextOp.setText("Waiting for Authentication");
+                                }
+
+                                @Override
+                                public void onSuccess(StorageResult<StorageResultSuccess> storageResult) {
+                                    editTextOp.setText("Successfully stored file");
+                                }
+
+                                @Override
+                                public void onFailure(StorageResultErrorType errorType) {
+                                    editTextOp.setText("Error storing file: " + errorType.name());
+                                }
+                            }
+                    );
                 }
             });
 
             btnRetrieve.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        final SecureAnnotatedModel ssm = mSecureCacheHandler.readData(SecureAnnotatedModel.class,
-                                "cachestorage-annotation.txt");
-                        editTextOp.setText(ssm.getData());
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error retrieving file", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    final StorageReadObject<SecureAnnotatedModel> readObject =
+                            new StorageReadObject<>("cachestorage-annotation.txt",
+                                    SecureAnnotatedModel.class);
+                    getSecureCacheHandler().readData(readObject,
+                            new StorageResultCallback<SecureAnnotatedModel>() {
+                                @Override
+                                public void onWaitingForAuthentication() {
+                                    editTextOp.setText("Waiting for Authentication");
+                                }
+
+                                @Override
+                                public void onSuccess(StorageResult<SecureAnnotatedModel> storageResult) {
+                                    editTextOp.setText(storageResult.getResult().getData());
+                                }
+
+                                @Override
+                                public void onFailure(StorageResultErrorType errorType) {
+                                    editTextOp.setText("Error retrieving file: " + errorType.name());
+                                }
+                            }
+                    );
                 }
             });
 
@@ -212,27 +295,52 @@ public class MainActivity extends AppCompatActivity
             btnStore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        final SecureSerializableModel ssm = new SecureSerializableModel(editTextInp.getText().toString());
-                        mSecureInternalFileHandler.writeData(ssm, "internalstorage-serializable.txt");
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error storing file", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    final StorageWriteObject<SecureSerializableModel> writeObject =
+                            new StorageWriteObject<>("internalstorage-serializable.txt",
+                                    new SecureSerializableModel(editTextInp.getText().toString()));
+                    getSecureInternalFileHandler().writeData(writeObject,
+                            new StorageResultCallback<StorageResultSuccess>() {
+                                @Override
+                                public void onWaitingForAuthentication() {
+                                    editTextOp.setText("Waiting for Authentication");
+                                }
+
+                                @Override
+                                public void onSuccess(StorageResult<StorageResultSuccess> storageResult) {
+                                    editTextOp.setText("Successfully stored file");
+                                }
+
+                                @Override
+                                public void onFailure(StorageResultErrorType errorType) {
+                                    editTextOp.setText("Error storing file: " + errorType.name());
+                                }
+                            });
                 }
             });
 
             btnRetrieve.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        final SecureSerializableModel ssm = mSecureInternalFileHandler.readData(SecureSerializableModel.class,
-                                "internalstorage-serializable.txt");
-                        editTextOp.setText(ssm.getData());
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error retrieving file", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    final StorageReadObject<SecureSerializableModel> readObject =
+                            new StorageReadObject<>("internalstorage-serializable.txt",
+                                    SecureSerializableModel.class);
+                    getSecureInternalFileHandler().readData(readObject,
+                            new StorageResultCallback<SecureSerializableModel>() {
+                                @Override
+                                public void onWaitingForAuthentication() {
+                                    editTextOp.setText("Waiting for Authentication");
+                                }
+
+                                @Override
+                                public void onSuccess(StorageResult<SecureSerializableModel> storageResult) {
+                                    editTextOp.setText(storageResult.getResult().getData());
+                                }
+
+                                @Override
+                                public void onFailure(StorageResultErrorType errorType) {
+                                    editTextOp.setText("Error retrieving file: " + errorType.name());
+                                }
+                            });
                 }
             });
 
@@ -246,28 +354,56 @@ public class MainActivity extends AppCompatActivity
             btnStore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        final SecureAnnotatedModel ssm = new SecureAnnotatedModel();
-                        ssm.setData(editTextInp.getText().toString());
-                        mSecureInternalFileHandler.writeData(ssm, "internalstorage-annotation.txt");
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error storing file", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    final SecureAnnotatedModel sam = new SecureAnnotatedModel();
+                    sam.setData(editTextInp.getText().toString());
+
+                    final StorageWriteObject<SecureAnnotatedModel> writeObject =
+                            new StorageWriteObject<>("internalstorage-annotation.txt", sam);
+
+                    getSecureInternalFileHandler().writeData(writeObject,
+                            new StorageResultCallback<StorageResultSuccess>() {
+                                @Override
+                                public void onWaitingForAuthentication() {
+                                    editTextOp.setText("Waiting for Authentication");
+                                }
+
+                                @Override
+                                public void onSuccess(StorageResult<StorageResultSuccess> storageResult) {
+                                    editTextOp.setText("Successfully stored file");
+                                }
+
+                                @Override
+                                public void onFailure(StorageResultErrorType errorType) {
+                                    editTextOp.setText("Error storing file: " + errorType.name());
+                                }
+                            });
                 }
             });
 
             btnRetrieve.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        final SecureAnnotatedModel ssm = mSecureInternalFileHandler.readData(SecureAnnotatedModel.class,
-                                "internalstorage-annotation.txt");
-                        editTextOp.setText(ssm.getData());
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error retrieving file", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    final StorageReadObject<SecureAnnotatedModel> readObject =
+                            new StorageReadObject<>("internalstorage-annotation.txt",
+                                    SecureAnnotatedModel.class);
+
+                    getSecureInternalFileHandler().readData(readObject,
+                            new StorageResultCallback<SecureAnnotatedModel>() {
+                                @Override
+                                public void onWaitingForAuthentication() {
+                                    editTextOp.setText("Waiting for Authentication");
+                                }
+
+                                @Override
+                                public void onSuccess(StorageResult<SecureAnnotatedModel> storageResult) {
+                                    editTextOp.setText(storageResult.getResult().getData());
+                                }
+
+                                @Override
+                                public void onFailure(StorageResultErrorType errorType) {
+                                    editTextOp.setText("Error retrieving file: " + errorType.name());
+                                }
+                            });
                 }
             });
 
@@ -280,29 +416,56 @@ public class MainActivity extends AppCompatActivity
             btnStore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        final SecureSerializableModel ssm = new SecureSerializableModel(editTextInp.getText().toString());
-                        mSecureExternalFileHandler.writeData(ssm, Environment.DIRECTORY_DOCUMENTS,
-                                "externalstorage-serializable.txt");
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error storing file", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    final StorageWriteObject<SecureSerializableModel> writeObject =
+                            new StorageWriteObject<>("externalstorage-serializable.txt",
+                                    new SecureSerializableModel(editTextInp.getText().toString()));
+                    final SecureSerializableModel ssm = new SecureSerializableModel(editTextInp.getText().toString());
+                    getSecureExternalFileHandler().writeData(Environment.DIRECTORY_DOCUMENTS,
+                            writeObject,
+                            new StorageResultCallback<StorageResultSuccess>() {
+                                @Override
+                                public void onWaitingForAuthentication() {
+                                    editTextOp.setText("Waiting for Authentication");
+                                }
+
+                                @Override
+                                public void onSuccess(StorageResult<StorageResultSuccess> storageResult) {
+                                    editTextOp.setText("Successfully stored file");
+                                }
+
+                                @Override
+                                public void onFailure(StorageResultErrorType errorType) {
+                                    editTextOp.setText("Error storing file: " + errorType.name());
+                                }
+                            });
                 }
             });
 
             btnRetrieve.setOnClickListener(new View.OnClickListener() {
+
                 @Override
                 public void onClick(View v) {
-                    try {
-                        final SecureSerializableModel ssm = mSecureExternalFileHandler.readData(SecureSerializableModel.class,
-                                Environment.DIRECTORY_DOCUMENTS,
-                                "externalstorage-serializable.txt");
-                        editTextOp.setText(ssm.getData());
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error retrieving file", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    final StorageReadObject<SecureSerializableModel> readObject =
+                            new StorageReadObject<>("externalstorage-serializable.txt",
+                                    SecureSerializableModel.class);
+                    getSecureExternalFileHandler().readData(Environment.DIRECTORY_DOCUMENTS,
+                            readObject,
+                            new StorageResultCallback<SecureSerializableModel>() {
+                                @Override
+                                public void onWaitingForAuthentication() {
+                                    editTextOp.setText("Waiting for Authentication");
+                                }
+
+                                @Override
+                                public void onSuccess(StorageResult<SecureSerializableModel> storageResult) {
+                                    editTextOp.setText(storageResult.getResult().getData());
+                                }
+
+                                @Override
+                                public void onFailure(StorageResultErrorType errorType) {
+                                    editTextOp.setText("Error retrieving file: " + errorType.name());
+                                }
+                            });
                 }
             });
 
@@ -315,29 +478,57 @@ public class MainActivity extends AppCompatActivity
             btnStore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        final SecureAnnotatedModel ssm = new SecureAnnotatedModel();
-                        ssm.setData(editTextInp.getText().toString());
-                        mSecureExternalFileHandler.writeData(ssm, Environment.DIRECTORY_DOCUMENTS,
-                                "externalstorage-annotation.txt");
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error storing file", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    final SecureAnnotatedModel sam = new SecureAnnotatedModel();
+                    sam.setData(editTextInp.getText().toString());
+
+                    final StorageWriteObject<SecureAnnotatedModel> writeObject =
+                            new StorageWriteObject<>("externalstorage-annotation.txt", sam);
+
+                    getSecureExternalFileHandler().writeData(Environment.DIRECTORY_DOCUMENTS,
+                            writeObject,
+                            new StorageResultCallback<StorageResultSuccess>() {
+                                @Override
+                                public void onWaitingForAuthentication() {
+                                    editTextOp.setText("Waiting for Authentication");
+                                }
+
+                                @Override
+                                public void onSuccess(StorageResult<StorageResultSuccess> storageResult) {
+                                    editTextOp.setText("Successfully stored file");
+                                }
+
+                                @Override
+                                public void onFailure(StorageResultErrorType errorType) {
+                                    editTextOp.setText("Error storing file: " + errorType.name());
+                                }
+                            });
                 }
             });
 
             btnRetrieve.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        final SecureAnnotatedModel ssm = mSecureExternalFileHandler.readData(SecureAnnotatedModel.class
-                                , Environment.DIRECTORY_DOCUMENTS, "externalstorage-annotation.txt");
-                        editTextOp.setText(ssm.getData());
-                    } catch (Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error retrieving file", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
+                    final StorageReadObject<SecureAnnotatedModel> readObject =
+                            new StorageReadObject<>("externalstorage-annotation.txt",
+                                    SecureAnnotatedModel.class);
+                    getSecureExternalFileHandler().readData(Environment.DIRECTORY_DOCUMENTS,
+                            readObject,
+                            new StorageResultCallback<SecureAnnotatedModel>() {
+                                @Override
+                                public void onWaitingForAuthentication() {
+                                    editTextOp.setText("Waiting for Authentication");
+                                }
+
+                                @Override
+                                public void onSuccess(StorageResult<SecureAnnotatedModel> storageResult) {
+                                    editTextOp.setText(storageResult.getResult().getData());
+                                }
+
+                                @Override
+                                public void onFailure(StorageResultErrorType errorType) {
+                                    editTextOp.setText("Error retrieving file: " + errorType.name());
+                                }
+                            });
                 }
             });
         } else if (id == R.id.nav_db_tc) {
