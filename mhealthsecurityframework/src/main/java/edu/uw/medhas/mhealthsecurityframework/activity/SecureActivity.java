@@ -4,7 +4,6 @@ import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import edu.uw.medhas.mhealthsecurityframework.authentication.AuthenticationManagerFactory;
 import edu.uw.medhas.mhealthsecurityframework.storage.cache.SecureCacheHandler;
@@ -27,8 +26,6 @@ public class SecureActivity extends AppCompatActivity {
         mSecureInternalFileHandler = new SecureInternalFileHandler(getBaseContext());
         mSecureExternalFileHandler = new SecureExternalFileHandler(getBaseContext());
         mSecureCacheHandler = new SecureCacheHandler(getBaseContext());
-
-        Log.v("SecureActivity::onCreate", "Going to init AuthenticationManagerFactory");
 
         AuthenticationManagerFactory.init((FingerprintManager) getSystemService(FINGERPRINT_SERVICE),
                 (KeyguardManager) getSystemService(KEYGUARD_SERVICE));

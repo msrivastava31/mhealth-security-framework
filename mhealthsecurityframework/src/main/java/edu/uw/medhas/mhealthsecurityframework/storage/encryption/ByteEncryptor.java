@@ -1,6 +1,7 @@
 package edu.uw.medhas.mhealthsecurityframework.storage.encryption;
 
 import android.hardware.fingerprint.FingerprintManager;
+import android.util.Log;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -60,7 +61,8 @@ public class ByteEncryptor {
 
                         callback.onSuccess(ivAndCipherText);
                     } catch (BadPaddingException | IllegalBlockSizeException ex) {
-                        ex.printStackTrace();
+                        Log.e("ByteEncryptor::encrypt",
+                                "Error encrypting data", ex);
                         callback.onFailure(StorageResultErrorType.ENCRYPTION_ERROR);
                     }
                 }
@@ -73,7 +75,8 @@ public class ByteEncryptor {
         } catch (IOException | CertificateException | UnrecoverableEntryException
                 | NoSuchProviderException | KeyStoreException | NoSuchAlgorithmException
                 | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException ex) {
-            ex.printStackTrace();
+            Log.e("ByteEncryptor::encrypt",
+                    "Error encrypting data", ex);
             callback.onFailure(StorageResultErrorType.ENCRYPTION_ERROR);
         }
     }
@@ -107,7 +110,8 @@ public class ByteEncryptor {
                     try {
                         callback.onSuccess(cipher.doFinal(cipherText));
                     } catch (BadPaddingException | IllegalBlockSizeException ex) {
-                        ex.printStackTrace();
+                        Log.e("ByteEncryptor::decrypt",
+                                "Error decrypting data", ex);
                         callback.onFailure(StorageResultErrorType.ENCRYPTION_ERROR);
                     }
                 }
@@ -120,7 +124,8 @@ public class ByteEncryptor {
         } catch (IOException | CertificateException | UnrecoverableEntryException
                 | NoSuchProviderException | KeyStoreException | NoSuchAlgorithmException
                 | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException ex) {
-            ex.printStackTrace();
+            Log.e("ByteEncryptor::decrypt",
+                    "Error decrypting data", ex);
             callback.onFailure(StorageResultErrorType.DECRYPTION_ERROR);
         }
     }
@@ -170,53 +175,4 @@ public class ByteEncryptor {
             throw new DecryptionException();
         }
     }
-
-    /*public static byte[] encrypt(String alias, byte[] plainText) {
-        try {
-            final IvParameterSpec ivParameterSpec = generateIvParameterSpec();
-
-            final SecretKey secretKey = AuthKeyManager.getKey(alias);
-
-            final Cipher cipher = Cipher.getInstance(sTransformation);
-
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
-            final byte[] cipherText = cipher.doFinal(plainText);
-
-            final byte[] ivAndCipherText = new byte[sIvLength + cipherText.length];
-            System.arraycopy(ivParameterSpec.getIV(), 0, ivAndCipherText, 0, sIvLength);
-            System.arraycopy(cipherText, 0, ivAndCipherText, sIvLength, cipherText.length);
-
-            return ivAndCipherText;
-        } catch (IOException | CertificateException | UnrecoverableEntryException
-                 | NoSuchProviderException | KeyStoreException | NoSuchAlgorithmException
-                 | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException
-                 | BadPaddingException | IllegalBlockSizeException ex) {
-            ex.printStackTrace();
-            throw new EncryptionException();
-        }
-    }
-
-    public static byte[] decrypt(String alias, byte[] ivAndCipherText) {
-        try {
-            final byte[] iv = new byte[sIvLength];
-            System.arraycopy(ivAndCipherText, 0, iv, 0, iv.length);
-            final IvParameterSpec ivParameterSpec = generateIvParameterSpec(iv);
-
-            final SecretKey secretKey = AuthKeyManager.getKey(alias);
-
-            byte[] cipherText = new byte[ivAndCipherText.length - sIvLength];
-            System.arraycopy(ivAndCipherText, sIvLength, cipherText, 0, cipherText.length);
-
-            final Cipher cipher = Cipher.getInstance(sTransformation);
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
-
-            return cipher.doFinal(cipherText);
-        } catch (IOException | CertificateException | UnrecoverableEntryException
-                | NoSuchProviderException | KeyStoreException | NoSuchAlgorithmException
-                | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException
-                | BadPaddingException | IllegalBlockSizeException ex) {
-            ex.printStackTrace();
-            throw new DecryptionException();
-        }
-    }*/
 }

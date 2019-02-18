@@ -1,6 +1,7 @@
 package edu.uw.medhas.mhealthsecurityframework.storage.internal;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -50,7 +51,8 @@ public class SecureInternalFileHandler extends AbstractSecureFileHandler {
                     fos.write(result);
                     storageResultCallback.onSuccess(new StorageResult<>(new StorageResultSuccess()));
                 } catch (IOException ioex) {
-                    ioex.printStackTrace();
+                    Log.e("SecureInternalFileHandler::writeData",
+                            "Error serializing object", ioex);
                     storageResultCallback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 }
             }
@@ -79,11 +81,13 @@ public class SecureInternalFileHandler extends AbstractSecureFileHandler {
         try (final FileInputStream fis = getContext().openFileInput(finalFileName)) {
             fis.read(objectAsBytes);
         } catch (FileNotFoundException fnfex) {
-            fnfex.printStackTrace();
+            Log.e("SecureInternalFileHandler::readData",
+                    "File " + finalFileName + " not found", fnfex);
             storageResultCallback.onFailure(StorageResultErrorType.FILE_NOT_FOUND_ERROR);
             return;
         } catch (IOException ioex) {
-            ioex.printStackTrace();
+            Log.e("SecureInternalFileHandler::readData",
+                    "Error deserializing object", ioex);
             storageResultCallback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
             return;
         }

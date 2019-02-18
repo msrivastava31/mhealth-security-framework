@@ -1,6 +1,7 @@
 package edu.uw.medhas.mhealthsecurityframework.storage.database.converters;
 
 import android.arch.persistence.room.TypeConverter;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
@@ -57,7 +58,8 @@ public class SecureFloatConverter extends AbstractSecureConverter {
             }
             return converterResult.getResult();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e("SecureFloatConverter::fromSecureFloatToEncryptedBytes",
+                    "Interrupted while encrypting data", e);
             throw new EncryptionException();
         }
     }
@@ -98,7 +100,8 @@ public class SecureFloatConverter extends AbstractSecureConverter {
 
             return new SecureFloat(ByteBuffer.wrap(converterResult.getResult()).getFloat());
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e("SecureFloatConverter::fromEncryptedBytesToSecureFloat",
+                    "Interrupted while decrypting data", e);
             throw new DecryptionException();
         }
     }

@@ -1,6 +1,8 @@
 package edu.uw.medhas.mhealthsecurityframework.storage;
 
 import android.content.Context;
+import android.util.Log;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayInputStream;
@@ -56,7 +58,8 @@ public abstract class AbstractSecureFileHandler {
                 oos.flush();
                 objectAsBytes = baos.toByteArray();
             } catch (IOException ioex) {
-                ioex.printStackTrace();
+                Log.e("AbstractSecureFileHandler::getSecureObjAsBytes",
+                        "Error serializing object", ioex);
                 callback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 return;
             }
@@ -77,7 +80,8 @@ public abstract class AbstractSecureFileHandler {
                 objectAsBytes = getObjectMapper().writeValueAsBytes(storageWriteObject.getObject());
                 storageWriteObject.getSecureFile().setJsonData(true);
             } catch (IOException ioex) {
-                ioex.printStackTrace();
+                Log.e("AbstractSecureFileHandler::getSecureObjAsBytes",
+                        "Error serializing object", ioex);
                 callback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 return;
             }
@@ -112,7 +116,8 @@ public abstract class AbstractSecureFileHandler {
                                     callback.onSuccess(getObjectMapper().readValue(result,
                                             storageReadObject.getClazz()));
                                 } catch (IOException ioex) {
-                                    ioex.printStackTrace();
+                                    Log.e("AbstractSecureFileHandler::readObjFromBytes",
+                                            "Error deserializing object", ioex);
                                     callback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                                 }
                             } else {
@@ -120,7 +125,8 @@ public abstract class AbstractSecureFileHandler {
                                      final ObjectInputStream ois = new ObjectInputStream(bais);) {
                                     callback.onSuccess((S) ois.readObject());
                                 } catch (IOException | ClassNotFoundException ex) {
-                                    ex.printStackTrace();
+                                    Log.e("AbstractSecureFileHandler::readObjFromBytes",
+                                            "Error deserializing object", ex);
                                     callback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                                 }
                             }
@@ -137,7 +143,8 @@ public abstract class AbstractSecureFileHandler {
                     callback.onSuccess(getObjectMapper().readValue(storageReadObject.getObjectBytes(),
                             storageReadObject.getClazz()));
                 } catch (IOException ioex) {
-                    ioex.printStackTrace();
+                    Log.e("AbstractSecureFileHandler::readObjFromBytes",
+                            "Error deserializing object", ioex);
                     callback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 }
             } else {
@@ -146,7 +153,8 @@ public abstract class AbstractSecureFileHandler {
                      final ObjectInputStream ois = new ObjectInputStream(bais);) {
                     callback.onSuccess((S) ois.readObject());
                 } catch (IOException | ClassNotFoundException ex) {
-                    ex.printStackTrace();
+                    Log.e("AbstractSecureFileHandler::readObjFromBytes",
+                            "Error deserializing object", ex);
                     callback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 }
             }
@@ -163,7 +171,8 @@ public abstract class AbstractSecureFileHandler {
                 oos.flush();
                 objectAsBytes = baos.toByteArray();
             } catch (IOException ioex) {
-                ioex.printStackTrace();
+                Log.e("AbstractSecureFileHandler::getSecureObjAsBytes",
+                        "Error serializing object", ioex);
                 throw new SerializationException();
             }
         } else {
@@ -182,7 +191,8 @@ public abstract class AbstractSecureFileHandler {
                 objectAsBytes = mObjectMapper.writeValueAsBytes(secureObj);
                 secureFile.setJsonData(true);
             } catch (IOException ioex) {
-                ioex.printStackTrace();
+                Log.e("AbstractSecureFileHandler::getSecureObjAsBytes",
+                        "Error serializing object", ioex);
                 throw new SerializationException();
             }
         }
@@ -205,7 +215,8 @@ public abstract class AbstractSecureFileHandler {
             try {
                 return mObjectMapper.readValue(unsecureObjectAsBytes, clazz);
             } catch (IOException ioex) {
-                ioex.printStackTrace();
+                Log.e("AbstractSecureFileHandler::getSecureObjAsBytes",
+                        "Error deserializing object", ioex);
                 throw new SerializationException();
             }
         } else {
@@ -213,7 +224,8 @@ public abstract class AbstractSecureFileHandler {
                  final ObjectInputStream ois = new ObjectInputStream(bais);) {
                 return (S) ois.readObject();
             } catch (IOException | ClassNotFoundException ex) {
-                ex.printStackTrace();
+                Log.e("AbstractSecureFileHandler::getSecureObjAsBytes",
+                        "Error deserializing object", ex);
                 throw new SerializationException();
             }
         }

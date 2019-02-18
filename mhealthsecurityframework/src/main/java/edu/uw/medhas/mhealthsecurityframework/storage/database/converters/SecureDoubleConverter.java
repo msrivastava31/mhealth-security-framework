@@ -58,7 +58,8 @@ public class SecureDoubleConverter extends AbstractSecureConverter {
             }
             return converterResult.getResult();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e("SecureDoubleConverter::fromSecureDoubleToEncryptedBytes",
+                    "Interrupted while encrypting data", e);
             throw new EncryptionException();
         }
     }
@@ -99,7 +100,8 @@ public class SecureDoubleConverter extends AbstractSecureConverter {
 
             return new SecureDouble(ByteBuffer.wrap(converterResult.getResult()).getDouble());
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e("SecureDoubleConverter::fromEncryptedBytesToSecureDouble",
+                    "Interrupted while decrypting data", e);
             throw new DecryptionException();
         }
     }

@@ -58,7 +58,8 @@ public class SecureIntegerConverter extends AbstractSecureConverter {
             }
             return converterResult.getResult();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e("SecureIntegerConverter::fromSecureIntegerToEncryptedBytes",
+                    "Interrupted while encrypting data", e);
             throw new EncryptionException();
         }
     }
@@ -99,7 +100,8 @@ public class SecureIntegerConverter extends AbstractSecureConverter {
 
             return new SecureInteger(ByteBuffer.wrap(converterResult.getResult()).getInt());
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e("SecureIntegerConverter::fromEncryptedBytesToSecureInteger",
+                    "Interrupted while decrypting data", e);
             throw new DecryptionException();
         }
     }

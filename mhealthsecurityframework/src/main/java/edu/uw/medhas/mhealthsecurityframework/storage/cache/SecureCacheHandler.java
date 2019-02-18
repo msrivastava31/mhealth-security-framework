@@ -1,6 +1,7 @@
 package edu.uw.medhas.mhealthsecurityframework.storage.cache;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,7 +51,8 @@ public class SecureCacheHandler extends AbstractSecureFileHandler {
                     fos.write(result);
                     storageResultCallback.onSuccess(new StorageResult<>(new StorageResultSuccess()));
                 } catch (IOException ioex) {
-                    ioex.printStackTrace();
+                    Log.e("SecureCacheHandler::writeData",
+                            "Error serializing object", ioex);
                     storageResultCallback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 }
             }
@@ -79,11 +81,13 @@ public class SecureCacheHandler extends AbstractSecureFileHandler {
         try (final FileInputStream fis = new FileInputStream(finalFileName)) {
             fis.read(objectAsBytes);
         } catch (FileNotFoundException fnfex) {
-            fnfex.printStackTrace();
+            Log.e("SecureCacheHandler::readData",
+                    "File " + finalFileName.getName() + " not found", fnfex);
             storageResultCallback.onFailure(StorageResultErrorType.FILE_NOT_FOUND_ERROR);
             return;
         } catch (IOException ioex) {
-            ioex.printStackTrace();
+            Log.e("SecureCacheHandler::readData",
+                    "Error deserializing object", ioex);
             storageResultCallback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
             return;
         }

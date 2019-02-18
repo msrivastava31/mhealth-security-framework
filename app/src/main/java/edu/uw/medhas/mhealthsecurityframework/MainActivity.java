@@ -8,7 +8,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,17 +45,20 @@ import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResult;
 import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultCallback;
 import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultErrorType;
 import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultSuccess;
+import edu.uw.medhas.mhealthsecurityframework.web.model.Request;
+import edu.uw.medhas.mhealthsecurityframework.web.model.RequestMethod;
+import edu.uw.medhas.mhealthsecurityframework.web.model.Response;
+import edu.uw.medhas.mhealthsecurityframework.web.model.Error;
+import edu.uw.medhas.mhealthsecurityframework.web.model.ResponseHandler;
+import edu.uw.medhas.mhealthsecurityframework.webclient.TestWebClient;
 
 public class MainActivity extends SecureActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private SecureDatabase mSecureDatabase;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Log.v("MainActivity::onCreate", "Should have init AuthenticationManagerFactory");
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -128,6 +130,8 @@ public class MainActivity extends SecureActivity
             newView = inflater.inflate(R.layout.content_extsto_ano, null);
         } else if (id == R.id.nav_db_tc) {
             newView = inflater.inflate(R.layout.content_dbsto_tc, null);
+        } else if (id == R.id.nav_ssl) {
+            newView = inflater.inflate(R.layout.content_ssl_checker, null);
         }
 
         LinearLayout mainLayout = (LinearLayout) findViewById(R.id.main_container);
@@ -145,17 +149,22 @@ public class MainActivity extends SecureActivity
 
                     try {
                         PasswordUtils.validatePassword(passwordStr);
-                        Toast.makeText(getApplicationContext(), "Password is strong", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(),
+                                "Password is strong", Toast.LENGTH_LONG).show();
                     } catch (PasswordTooShortException ptsex) {
-                        Toast.makeText(getApplicationContext(), "Password is too small", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(),
+                                "Password is too small", Toast.LENGTH_LONG).show();
                     } catch (PasswordNoUpperCaseCharacterException pnuccex) {
-                        Toast.makeText(getApplicationContext(), "Password has no upper case character",
+                        Toast.makeText(getApplicationContext(),
+                                "Password has no upper case character",
                                 Toast.LENGTH_LONG).show();
                     } catch (PasswordNoLowerCaseCharacterException pnlccex) {
-                        Toast.makeText(getApplicationContext(), "Password has no lower case character",
+                        Toast.makeText(getApplicationContext(),
+                                "Password has no lower case character",
                                 Toast.LENGTH_LONG).show();
                     } catch (PasswordNoNumberCharacterException pnncex) {
-                        Toast.makeText(getApplicationContext(), "Password has no number", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(),
+                                "Password has no number", Toast.LENGTH_LONG).show();
                     } catch (PasswordNoSpecialCharacterException pnscex) {
                         Toast.makeText(getApplicationContext(), "Password has no special character",
                                 Toast.LENGTH_LONG).show();
@@ -332,7 +341,8 @@ public class MainActivity extends SecureActivity
                                 }
 
                                 @Override
-                                public void onSuccess(StorageResult<SecureSerializableModel> storageResult) {
+                                public void onSuccess(
+                                        StorageResult<SecureSerializableModel> storageResult) {
                                     editTextOp.setText(storageResult.getResult().getData());
                                 }
 
@@ -419,7 +429,8 @@ public class MainActivity extends SecureActivity
                     final StorageWriteObject<SecureSerializableModel> writeObject =
                             new StorageWriteObject<>("externalstorage-serializable.txt",
                                     new SecureSerializableModel(editTextInp.getText().toString()));
-                    final SecureSerializableModel ssm = new SecureSerializableModel(editTextInp.getText().toString());
+                    final SecureSerializableModel ssm =
+                            new SecureSerializableModel(editTextInp.getText().toString());
                     getSecureExternalFileHandler().writeData(Environment.DIRECTORY_DOCUMENTS,
                             writeObject,
                             new StorageResultCallback<StorageResultSuccess>() {
@@ -429,7 +440,8 @@ public class MainActivity extends SecureActivity
                                 }
 
                                 @Override
-                                public void onSuccess(StorageResult<StorageResultSuccess> storageResult) {
+                                public void onSuccess(
+                                        StorageResult<StorageResultSuccess> storageResult) {
                                     editTextOp.setText("Successfully stored file");
                                 }
 
@@ -457,7 +469,8 @@ public class MainActivity extends SecureActivity
                                 }
 
                                 @Override
-                                public void onSuccess(StorageResult<SecureSerializableModel> storageResult) {
+                                public void onSuccess(
+                                        StorageResult<SecureSerializableModel> storageResult) {
                                     editTextOp.setText(storageResult.getResult().getData());
                                 }
 
@@ -585,7 +598,8 @@ public class MainActivity extends SecureActivity
                             @Override
                             public void run() {
                                 String id = (String) editTextOp.getText();
-                                SensitiveDbData object = mSecureDatabase.daoAccess().fetchOnebyId(Integer.valueOf(id));
+                                SensitiveDbData object = mSecureDatabase.daoAccess()
+                                        .fetchOnebyId(Integer.valueOf(id));
                                 editTextOp.setText(
                                           "Integer: " + String.valueOf(object.getIntValue().getValue())
                                         + ", Long: " +String.valueOf(object.getLongValue().getValue())
@@ -602,6 +616,35 @@ public class MainActivity extends SecureActivity
                 }
             });
 
+        } else if (id == R.id.nav_ssl) {
+            final EditText editTextUrl = (EditText) findViewById(R.id.sslCheckerUrl);
+            final Button btnValidate = (Button) findViewById(R.id.sslCheckerBtn);
+            final TextView editTextOp = (TextView) findViewById(R.id.sslCheckerOp);
+
+            btnValidate.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    final String url = editTextUrl.getText().toString();
+
+                    final TestWebClient webClient = new TestWebClient(
+                            new ResponseHandler() {
+
+                                @Override
+                                public void onSuccess(Response response) {
+                                    editTextOp.setText("Connected successfully to: " + url);
+                                }
+
+                                @Override
+                                public void onError(Error error) {
+                                    editTextOp.setText("Can't allow to connect to " + url + " because of: "
+                                            + error.toString());
+                                }
+                            });
+
+                    webClient.execute(new Request(url, RequestMethod.GET));
+                }
+            });
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

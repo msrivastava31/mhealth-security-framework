@@ -55,4 +55,12 @@
         </menu>
     </item>
 
+    <item android:title="SSL Checker">
+        <menu>
+            <item
+                android:id="@+id/nav_ssl"
+                android:title="SSL Checker" />
+        </menu>
+    </item>
+
 </menu>

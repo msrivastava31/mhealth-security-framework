@@ -1,6 +1,7 @@
 package edu.uw.medhas.mhealthsecurityframework.storage.database.converters;
 
 import android.arch.persistence.room.TypeConverter;
+import android.util.Log;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
@@ -57,7 +58,8 @@ public class SecureStringConverter extends AbstractSecureConverter {
             }
             return converterResult.getResult();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e("SecureStringConverter::fromSecureStringToEncryptedBytes",
+                    "Interrupted while encrypting data", e);
             throw new EncryptionException();
         }
     }
@@ -98,7 +100,8 @@ public class SecureStringConverter extends AbstractSecureConverter {
 
             return new SecureString(new String(converterResult.getResult(), StandardCharsets.UTF_8));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e("SecureStringConverter::fromEncryptedBytesToSecureString",
+                    "Interrupted while decrypting data", e);
             throw new DecryptionException();
         }
     }

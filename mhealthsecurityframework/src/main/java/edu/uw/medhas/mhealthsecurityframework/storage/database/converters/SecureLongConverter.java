@@ -1,6 +1,7 @@
 package edu.uw.medhas.mhealthsecurityframework.storage.database.converters;
 
 import android.arch.persistence.room.TypeConverter;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
@@ -57,7 +58,8 @@ public class SecureLongConverter extends AbstractSecureConverter {
             }
             return converterResult.getResult();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e("SecureLongConverter::fromSecureLongToEncryptedBytes",
+                    "Interrupted while encrypting data", e);
             throw new EncryptionException();
         }
     }
@@ -98,7 +100,8 @@ public class SecureLongConverter extends AbstractSecureConverter {
 
             return new SecureLong(ByteBuffer.wrap(converterResult.getResult()).getLong());
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e("SecureLongConverter::fromEncryptedBytesToSecureLong",
+                    "Interrupted while decrypting data", e);
             throw new DecryptionException();
         }
     }

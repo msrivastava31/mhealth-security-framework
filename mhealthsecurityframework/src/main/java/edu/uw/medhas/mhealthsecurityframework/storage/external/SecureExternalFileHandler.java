@@ -1,6 +1,7 @@
 package edu.uw.medhas.mhealthsecurityframework.storage.external;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -60,7 +61,8 @@ public class SecureExternalFileHandler extends AbstractSecureFileHandler {
                     fos.write(result);
                     storageResultCallback.onSuccess(new StorageResult<>(new StorageResultSuccess()));
                 } catch (IOException ioex) {
-                    ioex.printStackTrace();
+                    Log.e("SecureExternalFileHandler::writeData",
+                            "Error serializing object", ioex);
                     storageResultCallback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 }
             }
@@ -98,11 +100,13 @@ public class SecureExternalFileHandler extends AbstractSecureFileHandler {
         try (final FileInputStream fis = new FileInputStream(finalFileName)) {
             fis.read(objectAsBytes);
         } catch (FileNotFoundException fnfex) {
-            fnfex.printStackTrace();
+            Log.e("SecureExternalFileHandler::readData",
+                    "File " + finalFileName.getName() + " not found", fnfex);
             storageResultCallback.onFailure(StorageResultErrorType.FILE_NOT_FOUND_ERROR);
             return;
         } catch (IOException ioex) {
-            ioex.printStackTrace();
+            Log.e("SecureExternalFileHandler::readData",
+                    "Error deserializing object", ioex);
             storageResultCallback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
             return;
         }
