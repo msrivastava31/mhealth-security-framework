@@ -62,7 +62,7 @@ public class ByteEncryptor {
                         callback.onSuccess(ivAndCipherText);
                     } catch (BadPaddingException | IllegalBlockSizeException ex) {
                         Log.e("ByteEncryptor::encrypt",
-                                "Error encrypting data", ex);
+                                "WebError encrypting data", ex);
                         callback.onFailure(StorageResultErrorType.ENCRYPTION_ERROR);
                     }
                 }
@@ -76,7 +76,7 @@ public class ByteEncryptor {
                 | NoSuchProviderException | KeyStoreException | NoSuchAlgorithmException
                 | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException ex) {
             Log.e("ByteEncryptor::encrypt",
-                    "Error encrypting data", ex);
+                    "WebError encrypting data", ex);
             callback.onFailure(StorageResultErrorType.ENCRYPTION_ERROR);
         }
     }
@@ -111,7 +111,7 @@ public class ByteEncryptor {
                         callback.onSuccess(cipher.doFinal(cipherText));
                     } catch (BadPaddingException | IllegalBlockSizeException ex) {
                         Log.e("ByteEncryptor::decrypt",
-                                "Error decrypting data", ex);
+                                "WebError decrypting data", ex);
                         callback.onFailure(StorageResultErrorType.ENCRYPTION_ERROR);
                     }
                 }
@@ -125,7 +125,7 @@ public class ByteEncryptor {
                 | NoSuchProviderException | KeyStoreException | NoSuchAlgorithmException
                 | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException ex) {
             Log.e("ByteEncryptor::decrypt",
-                    "Error decrypting data", ex);
+                    "WebError decrypting data", ex);
             callback.onFailure(StorageResultErrorType.DECRYPTION_ERROR);
         }
     }

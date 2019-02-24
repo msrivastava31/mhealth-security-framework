@@ -62,7 +62,7 @@ public class SecureExternalFileHandler extends AbstractSecureFileHandler {
                     storageResultCallback.onSuccess(new StorageResult<>(new StorageResultSuccess()));
                 } catch (IOException ioex) {
                     Log.e("SecureExternalFileHandler::writeData",
-                            "Error serializing object", ioex);
+                            "WebError serializing object", ioex);
                     storageResultCallback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 }
             }
@@ -106,7 +106,7 @@ public class SecureExternalFileHandler extends AbstractSecureFileHandler {
             return;
         } catch (IOException ioex) {
             Log.e("SecureExternalFileHandler::readData",
-                    "Error deserializing object", ioex);
+                    "WebError deserializing object", ioex);
             storageResultCallback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
             return;
         }

@@ -63,4 +63,20 @@
         </menu>
     </item>
 
+    <item android:title="Access Control">
+        <menu>
+            <item
+                android:id="@+id/nav_acl_user"
+                android:title="User" />
+
+            <item
+                android:id="@+id/nav_acl_role"
+                android:title="Role" />
+
+            <item
+                android:id="@+id/nav_acl_privilege"
+                android:title="Privilege" />
+        </menu>
+    </item>
+
 </menu>

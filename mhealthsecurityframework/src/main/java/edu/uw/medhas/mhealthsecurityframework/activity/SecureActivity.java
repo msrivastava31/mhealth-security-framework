@@ -5,6 +5,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import edu.uw.medhas.mhealthsecurityframework.acl.service.AclServiceFactory;
 import edu.uw.medhas.mhealthsecurityframework.authentication.AuthenticationManagerFactory;
 import edu.uw.medhas.mhealthsecurityframework.storage.cache.SecureCacheHandler;
 import edu.uw.medhas.mhealthsecurityframework.storage.external.SecureExternalFileHandler;
@@ -29,6 +30,11 @@ public class SecureActivity extends AppCompatActivity {
 
         AuthenticationManagerFactory.init((FingerprintManager) getSystemService(FINGERPRINT_SERVICE),
                 (KeyguardManager) getSystemService(KEYGUARD_SERVICE));
+    }
+
+    public AclServiceFactory getAclServiceFactory() {
+        AclServiceFactory.init(getApplicationContext());
+        return AclServiceFactory.getInstance();
     }
 
     public SecureInternalFileHandler getSecureInternalFileHandler() {

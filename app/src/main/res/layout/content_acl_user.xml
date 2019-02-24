@@ -18,7 +18,7 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="SSL Checker"
+            android:text="ACL - User"
             android:textSize="26dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -33,21 +33,35 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/sslCheckerUrl"
+            android:id="@+id/aclUserNewUser"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:hint="Any 3rd party URL"
+            android:hint="New User id"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/aclUserCurrentUser"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="Current User id"
             android:inputType="text" />
 
         <Button
-            android:id="@+id/sslCheckerBtn"
+            android:id="@+id/aclUserCreate"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Validate"
+            android:text="Create User"
+            android:layout_marginBottom="60dp" />
+
+        <Button
+            android:id="@+id/aclUserDelete"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Delete User"
             android:layout_marginBottom="60dp" />
 
         <TextView
-            android:id="@+id/sslCheckerOp"
+            android:id="@+id/aclUserOp"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textSize="17dp"

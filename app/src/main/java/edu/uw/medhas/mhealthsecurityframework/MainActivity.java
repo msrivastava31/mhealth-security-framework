@@ -23,6 +23,16 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
+import edu.uw.medhas.mhealthsecurityframework.acl.db.DbError;
+import edu.uw.medhas.mhealthsecurityframework.acl.db.ResultHandler;
+import edu.uw.medhas.mhealthsecurityframework.acl.model.AuthContext;
+import edu.uw.medhas.mhealthsecurityframework.acl.model.Privilege;
+import edu.uw.medhas.mhealthsecurityframework.acl.model.Role;
+import edu.uw.medhas.mhealthsecurityframework.acl.model.User;
+import edu.uw.medhas.mhealthsecurityframework.acl.model.UserRole;
+import edu.uw.medhas.mhealthsecurityframework.acl.service.PrivilegeService;
+import edu.uw.medhas.mhealthsecurityframework.acl.service.RoleService;
+import edu.uw.medhas.mhealthsecurityframework.acl.service.UserService;
 import edu.uw.medhas.mhealthsecurityframework.activity.SecureActivity;
 import edu.uw.medhas.mhealthsecurityframework.model.SecureAnnotatedModel;
 import edu.uw.medhas.mhealthsecurityframework.model.SecureSerializableModel;
@@ -48,7 +58,7 @@ import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultSucces
 import edu.uw.medhas.mhealthsecurityframework.web.model.Request;
 import edu.uw.medhas.mhealthsecurityframework.web.model.RequestMethod;
 import edu.uw.medhas.mhealthsecurityframework.web.model.Response;
-import edu.uw.medhas.mhealthsecurityframework.web.model.Error;
+import edu.uw.medhas.mhealthsecurityframework.web.model.WebError;
 import edu.uw.medhas.mhealthsecurityframework.web.model.ResponseHandler;
 import edu.uw.medhas.mhealthsecurityframework.webclient.TestWebClient;
 
@@ -132,6 +142,12 @@ public class MainActivity extends SecureActivity
             newView = inflater.inflate(R.layout.content_dbsto_tc, null);
         } else if (id == R.id.nav_ssl) {
             newView = inflater.inflate(R.layout.content_ssl_checker, null);
+        } else if (id == R.id.nav_acl_user) {
+            newView = inflater.inflate(R.layout.content_acl_user, null);
+        } else if (id == R.id.nav_acl_role) {
+            newView = inflater.inflate(R.layout.content_acl_role, null);
+        } else if (id == R.id.nav_acl_privilege) {
+            newView = inflater.inflate(R.layout.content_acl_privilege, null);
         }
 
         LinearLayout mainLayout = (LinearLayout) findViewById(R.id.main_container);
@@ -197,7 +213,7 @@ public class MainActivity extends SecureActivity
 
                             @Override
                             public void onFailure(StorageResultErrorType errorType) {
-                                editTextOp.setText("Error storing file: " + errorType.name());
+                                editTextOp.setText("WebError storing file: " + errorType.name());
                             }
                         }
                     );
@@ -224,7 +240,7 @@ public class MainActivity extends SecureActivity
 
                             @Override
                             public void onFailure(StorageResultErrorType errorType) {
-                                editTextOp.setText("Error retrieving file: " + errorType.name());
+                                editTextOp.setText("WebError retrieving file: " + errorType.name());
                             }
                         }
                     );
@@ -261,7 +277,7 @@ public class MainActivity extends SecureActivity
 
                                 @Override
                                 public void onFailure(StorageResultErrorType errorType) {
-                                    editTextOp.setText("Error storing file: " + errorType.name());
+                                    editTextOp.setText("WebError storing file: " + errorType.name());
                                 }
                             }
                     );
@@ -288,7 +304,7 @@ public class MainActivity extends SecureActivity
 
                                 @Override
                                 public void onFailure(StorageResultErrorType errorType) {
-                                    editTextOp.setText("Error retrieving file: " + errorType.name());
+                                    editTextOp.setText("WebError retrieving file: " + errorType.name());
                                 }
                             }
                     );
@@ -321,7 +337,7 @@ public class MainActivity extends SecureActivity
 
                                 @Override
                                 public void onFailure(StorageResultErrorType errorType) {
-                                    editTextOp.setText("Error storing file: " + errorType.name());
+                                    editTextOp.setText("WebError storing file: " + errorType.name());
                                 }
                             });
                 }
@@ -348,7 +364,7 @@ public class MainActivity extends SecureActivity
 
                                 @Override
                                 public void onFailure(StorageResultErrorType errorType) {
-                                    editTextOp.setText("Error retrieving file: " + errorType.name());
+                                    editTextOp.setText("WebError retrieving file: " + errorType.name());
                                 }
                             });
                 }
@@ -384,7 +400,7 @@ public class MainActivity extends SecureActivity
 
                                 @Override
                                 public void onFailure(StorageResultErrorType errorType) {
-                                    editTextOp.setText("Error storing file: " + errorType.name());
+                                    editTextOp.setText("WebError storing file: " + errorType.name());
                                 }
                             });
                 }
@@ -411,7 +427,7 @@ public class MainActivity extends SecureActivity
 
                                 @Override
                                 public void onFailure(StorageResultErrorType errorType) {
-                                    editTextOp.setText("Error retrieving file: " + errorType.name());
+                                    editTextOp.setText("WebError retrieving file: " + errorType.name());
                                 }
                             });
                 }
@@ -447,7 +463,7 @@ public class MainActivity extends SecureActivity
 
                                 @Override
                                 public void onFailure(StorageResultErrorType errorType) {
-                                    editTextOp.setText("Error storing file: " + errorType.name());
+                                    editTextOp.setText("WebError storing file: " + errorType.name());
                                 }
                             });
                 }
@@ -476,7 +492,7 @@ public class MainActivity extends SecureActivity
 
                                 @Override
                                 public void onFailure(StorageResultErrorType errorType) {
-                                    editTextOp.setText("Error retrieving file: " + errorType.name());
+                                    editTextOp.setText("WebError retrieving file: " + errorType.name());
                                 }
                             });
                 }
@@ -512,7 +528,7 @@ public class MainActivity extends SecureActivity
 
                                 @Override
                                 public void onFailure(StorageResultErrorType errorType) {
-                                    editTextOp.setText("Error storing file: " + errorType.name());
+                                    editTextOp.setText("WebError storing file: " + errorType.name());
                                 }
                             });
                 }
@@ -539,7 +555,7 @@ public class MainActivity extends SecureActivity
 
                                 @Override
                                 public void onFailure(StorageResultErrorType errorType) {
-                                    editTextOp.setText("Error retrieving file: " + errorType.name());
+                                    editTextOp.setText("WebError retrieving file: " + errorType.name());
                                 }
                             });
                 }
@@ -636,13 +652,228 @@ public class MainActivity extends SecureActivity
                                 }
 
                                 @Override
-                                public void onError(Error error) {
+                                public void onError(WebError error) {
                                     editTextOp.setText("Can't allow to connect to " + url + " because of: "
                                             + error.toString());
                                 }
                             });
 
                     webClient.execute(new Request(url, RequestMethod.GET));
+                }
+            });
+        } else if (id == R.id.nav_acl_user) {
+            final EditText editTextNewUser = (EditText) findViewById(R.id.aclUserNewUser);
+            final EditText editTextCurrentUser = (EditText) findViewById(R.id.aclUserCurrentUser);
+            final Button btnCreate = (Button) findViewById(R.id.aclUserCreate);
+            final Button btnDelete = (Button) findViewById(R.id.aclUserDelete);
+            final TextView editTextOp = (TextView) findViewById(R.id.aclUserOp);
+
+            final UserService userService = getAclServiceFactory().getUserService();
+
+            btnCreate.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    final User user = new User();
+                    user.setId(editTextNewUser.getText().toString());
+                    user.setName(user.getId() + "-name");
+
+                    final AuthContext context = new AuthContext(editTextCurrentUser.getText().toString());
+
+                    userService.createUser(user, context, new ResultHandler<User>() {
+                        @Override
+                        public void onSuccess(User result) {
+                            editTextOp.setText("Successfully created User: " + result.getId());
+                        }
+
+                        @Override
+                        public void onFailure(DbError error) {
+                            editTextOp.setText("Unsuccessful: " + error.getCode() + ", " + error.getMessage());
+                        }
+                    });
+                }
+            });
+
+            btnDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final String userId = editTextNewUser.getText().toString();
+                    final AuthContext context = new AuthContext(editTextCurrentUser.getText().toString());
+
+                    userService.deleteUser(userId, context, new ResultHandler<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            editTextOp.setText("Successfully deleted User");
+                        }
+
+                        @Override
+                        public void onFailure(DbError error) {
+                            editTextOp.setText("Unsuccessful: " + error.getCode() + ", " + error.getMessage());
+                        }
+                    });
+                }
+            });
+
+        } else if (id == R.id.nav_acl_role) {
+            final EditText editTextNewRole = (EditText) findViewById(R.id.aclRoleNewRole);
+            final EditText editTextCurrentUser = (EditText) findViewById(R.id.aclRoleCurrentUser);
+            final Button btnCreate = (Button) findViewById(R.id.aclRoleCreate);
+            final Button btnDelete = (Button) findViewById(R.id.aclRoleDelete);
+            final TextView editTextOp = (TextView) findViewById(R.id.aclRoleOp);
+
+            final RoleService roleService = getAclServiceFactory().getRoleService();
+
+            btnCreate.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    final Role role = new Role();
+                    role.setName(editTextNewRole.getText().toString());
+
+                    final AuthContext context = new AuthContext(editTextCurrentUser.getText().toString());
+
+                    roleService.createRole(role, context, new ResultHandler<Role>() {
+                        @Override
+                        public void onSuccess(Role result) {
+                            editTextOp.setText("Successfully created Role: " + result.getId());
+                        }
+
+                        @Override
+                        public void onFailure(DbError error) {
+                            editTextOp.setText("Unsuccessful: " + error.getCode() + ", " + error.getMessage());
+                        }
+                    });
+                }
+            });
+
+            btnDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final String roleId = editTextNewRole.getText().toString();
+                    final AuthContext context = new AuthContext(editTextCurrentUser.getText().toString());
+
+                    roleService.deleteRole(roleId, context, new ResultHandler<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            editTextOp.setText("Successfully deleted Role");
+                        }
+
+                        @Override
+                        public void onFailure(DbError error) {
+                            editTextOp.setText("Unsuccessful: " + error.getCode() + ", " + error.getMessage());
+                        }
+                    });
+                }
+            });
+        } else if (id == R.id.nav_acl_privilege) {
+            final EditText editTextUser = (EditText) findViewById(R.id.aclPrivilegeUser);
+            final EditText editTextRole = (EditText) findViewById(R.id.aclPrivilegeRole);
+            final EditText editTextResource = (EditText) findViewById(R.id.aclPrivilegeResource);
+            final EditText editTextOperation = (EditText) findViewById(R.id.aclPrivilegeOperation);
+
+            final EditText editTextCurrentUser = (EditText) findViewById(R.id.aclPrivilegeCurrentUser);
+            final Button btnAssign = (Button) findViewById(R.id.aclPrivilegeAssign);
+            final Button btnCreate = (Button) findViewById(R.id.aclPrivilegeCreate);
+            final Button btnDelete = (Button) findViewById(R.id.aclPrivilegeDelete);
+            final Button btnValidate = (Button) findViewById(R.id.aclPrivilegeCheck);
+            final TextView editTextOp = (TextView) findViewById(R.id.aclPrivilegeOp);
+
+            final UserService userService = getAclServiceFactory().getUserService();
+
+            final PrivilegeService privilegeService = getAclServiceFactory().getPrivilegeService();
+
+            btnAssign.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    final String userId = editTextUser.getText().toString();
+                    final String roleName = editTextRole.getText().toString();
+
+                    final AuthContext context = new AuthContext(editTextCurrentUser.getText().toString());
+
+                    userService.assignRoleToUser(userId, roleName, context, new ResultHandler<UserRole>() {
+                        @Override
+                        public void onSuccess(UserRole result) {
+                            editTextOp.setText("Successfully assigned Role: " + roleName + " to User: " + userId);
+                        }
+
+                        @Override
+                        public void onFailure(DbError error) {
+                            editTextOp.setText("Unsuccessful: " + error.getCode() + ", " + error.getMessage());
+                        }
+                    });
+                }
+            });
+
+            btnCreate.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    final String roleName = editTextRole.getText().toString();
+                    final String resourceName = editTextResource.getText().toString();
+                    final String opName = editTextOperation.getText().toString();
+
+                    final AuthContext context = new AuthContext(editTextCurrentUser.getText().toString());
+
+                    privilegeService.createPrivilege(roleName, resourceName, opName, context,
+                            new ResultHandler<Privilege>() {
+                        @Override
+                        public void onSuccess(Privilege result) {
+                            editTextOp.setText("Successfully created Privilege: " + roleName + ", " + resourceName
+                             + ", " + opName);
+                        }
+
+                        @Override
+                        public void onFailure(DbError error) {
+                            editTextOp.setText("Unsuccessful: " + error.getCode() + ", " + error.getMessage());
+                        }
+                    });
+                }
+            });
+
+            btnDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final String roleName = editTextRole.getText().toString();
+                    final String resourceName = editTextResource.getText().toString();
+                    final String opName = editTextOperation.getText().toString();
+
+                    final AuthContext context = new AuthContext(editTextCurrentUser.getText().toString());
+
+                    privilegeService.deletePrivilege(roleName, resourceName, opName, context,
+                            new ResultHandler<Void>() {
+                                @Override
+                                public void onSuccess(Void result) {
+                                    editTextOp.setText("Successfully deleted Privilege");
+                                }
+
+                                @Override
+                                public void onFailure(DbError error) {
+                                    editTextOp.setText("Unsuccessful: " + error.getCode() + ", " + error.getMessage());
+                                }
+                            });
+                }
+            });
+
+            btnValidate.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    final String userId = editTextUser.getText().toString();
+                    final String resourceName = editTextResource.getText().toString();
+                    final String opName = editTextOperation.getText().toString();
+
+                    privilegeService.isAllowed(userId, resourceName, opName, new ResultHandler<Boolean>() {
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            editTextOp.setText("Authorization result: " + result);
+                        }
+
+                        @Override
+                        public void onFailure(DbError error) {
+                            editTextOp.setText("Unsuccessful: " + error.getCode() + ", " + error.getMessage());
+                        }
+                    });
                 }
             });
         }

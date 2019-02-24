@@ -23,7 +23,7 @@ import edu.uw.medhas.mhealthsecurityframework.web.exception.NotSSLException;
 import edu.uw.medhas.mhealthsecurityframework.web.model.Request;
 import edu.uw.medhas.mhealthsecurityframework.web.model.RequestMethod;
 import edu.uw.medhas.mhealthsecurityframework.web.model.Response;
-import edu.uw.medhas.mhealthsecurityframework.web.model.Error;
+import edu.uw.medhas.mhealthsecurityframework.web.model.WebError;
 import edu.uw.medhas.mhealthsecurityframework.web.model.ResponseHandler;
 
 /**
@@ -56,8 +56,8 @@ public abstract class AbstractWebClient extends AsyncTask<Request, Void, Respons
     protected void onPostExecute(Response response) {
         super.onPostExecute(response);
 
-        if (response instanceof Error) {
-            mResponseHandler.onError((Error) response);
+        if (response instanceof WebError) {
+            mResponseHandler.onError((WebError) response);
         } else {
             mResponseHandler.onSuccess(response);
         }
@@ -66,7 +66,7 @@ public abstract class AbstractWebClient extends AsyncTask<Request, Void, Respons
     @Override
     protected Response doInBackground(Request... requests) {
         if (requests.length > 1) {
-            return new Error(Error.CustomErrorType.SINGLE_REQUEST);
+            return new WebError(WebError.CustomErrorType.SINGLE_REQUEST);
         }
 
         final Request request = requests[0];
@@ -137,14 +137,14 @@ public abstract class AbstractWebClient extends AsyncTask<Request, Void, Respons
                     "Can't create connection", e);
 
             if (e instanceof MalformedURLException) {
-                return new Error(Error.CustomErrorType.MALFORMED_URL);
+                return new WebError(WebError.CustomErrorType.MALFORMED_URL);
             }
 
-            return new Error(Error.CustomErrorType.CANT_CONNECT);
+            return new WebError(WebError.CustomErrorType.CANT_CONNECT);
         } catch (NotSSLException e) {
             Log.e("AbstractWebClient::doGet",
                     "Not SSL URL", e);
-            return new Error(Error.CustomErrorType.NOT_SSL_URL);
+            return new WebError(WebError.CustomErrorType.NOT_SSL_URL);
         }
 
         buildHeaders(connection, request.getHeaders());
@@ -154,7 +154,7 @@ public abstract class AbstractWebClient extends AsyncTask<Request, Void, Respons
         } catch (ProtocolException e) {
             Log.e("AbstractWebClient::doGet",
                     "Incorrect Request method", e);
-            return new Error(Error.CustomErrorType.REQUEST_METHOD_NOT_SUPPORTED);
+            return new WebError(WebError.CustomErrorType.REQUEST_METHOD_NOT_SUPPORTED);
         }
 
         connection.setDoInput(true);
@@ -166,23 +166,23 @@ public abstract class AbstractWebClient extends AsyncTask<Request, Void, Respons
             response = readResponse(connection);
         } catch (IOException  e) {
             Log.e("AbstractWebClient::doGet",
-                    "Error reading response", e);
+                    "WebError reading response", e);
 
             if (e instanceof SSLHandshakeException) {
-                return new Error(Error.CustomErrorType.CANT_CONNECT_SSL);
+                return new WebError(WebError.CustomErrorType.CANT_CONNECT_SSL);
             }
 
-            return new Error(Error.CustomErrorType.CANT_READ_RESPONSE);
+            return new WebError(WebError.CustomErrorType.CANT_READ_RESPONSE);
         } catch (SecurityException e) {
             Log.e("AbstractWebClient::doGet",
-                    "Error connecting to the internet", e);
-            return new Error(Error.CustomErrorType.NO_INTERNET_CONN);
+                    "WebError connecting to the internet", e);
+            return new WebError(WebError.CustomErrorType.NO_INTERNET_CONN);
         }
 
         connection.disconnect();
 
         return (responseCode >= 400)
-                ? new Error(responseCode, response)
+                ? new WebError(responseCode, response)
                 : new Response(responseCode, response);
     }
 
@@ -198,13 +198,13 @@ public abstract class AbstractWebClient extends AsyncTask<Request, Void, Respons
             Log.e("AbstractWebClient::doPost",
                     "Can't create connection", e);
             if (e instanceof MalformedURLException) {
-                return new Error(Error.CustomErrorType.MALFORMED_URL);
+                return new WebError(WebError.CustomErrorType.MALFORMED_URL);
             }
-            return new Error(Error.CustomErrorType.CANT_CONNECT);
+            return new WebError(WebError.CustomErrorType.CANT_CONNECT);
         } catch (NotSSLException e) {
             Log.e("AbstractWebClient::doPost",
                     "Not SSL URL", e);
-            return new Error(Error.CustomErrorType.NOT_SSL_URL);
+            return new WebError(WebError.CustomErrorType.NOT_SSL_URL);
         }
 
         buildHeaders(connection, request.getHeaders());
@@ -214,7 +214,7 @@ public abstract class AbstractWebClient extends AsyncTask<Request, Void, Respons
         } catch (ProtocolException e) {
             Log.e("AbstractWebClient::doPost",
                     "Incorrect Request method", e);
-            return new Error(Error.CustomErrorType.REQUEST_METHOD_NOT_SUPPORTED);
+            return new WebError(WebError.CustomErrorType.REQUEST_METHOD_NOT_SUPPORTED);
         }
 
         connection.setDoInput(true);
@@ -224,8 +224,8 @@ public abstract class AbstractWebClient extends AsyncTask<Request, Void, Respons
             writeRequest(connection, request.getBody());
         } catch (IOException e) {
             Log.e("AbstractWebClient::doPost",
-                    "Error submitting request", e);
-            return new Error(Error.CustomErrorType.CANT_SUBMIT_REQUEST);
+                    "WebError submitting request", e);
+            return new WebError(WebError.CustomErrorType.CANT_SUBMIT_REQUEST);
         }
 
         final byte[] response;
@@ -235,23 +235,23 @@ public abstract class AbstractWebClient extends AsyncTask<Request, Void, Respons
             response = readResponse(connection);
         } catch (IOException  e) {
             Log.e("AbstractWebClient::doPost",
-                    "Error reading response", e);
+                    "WebError reading response", e);
 
             if (e instanceof SSLHandshakeException) {
-                return new Error(Error.CustomErrorType.CANT_CONNECT_SSL);
+                return new WebError(WebError.CustomErrorType.CANT_CONNECT_SSL);
             }
 
-            return new Error(Error.CustomErrorType.CANT_READ_RESPONSE);
+            return new WebError(WebError.CustomErrorType.CANT_READ_RESPONSE);
         } catch (SecurityException e) {
             Log.e("AbstractWebClient::doPost",
-                    "Error connecting to the internet", e);
-            return new Error(Error.CustomErrorType.NO_INTERNET_CONN);
+                    "WebError connecting to the internet", e);
+            return new WebError(WebError.CustomErrorType.NO_INTERNET_CONN);
         }
 
         connection.disconnect();
 
         return (responseCode >= 400)
-                ? new Error(responseCode, response)
+                ? new WebError(responseCode, response)
                 : new Response(responseCode, response);
     }
 }

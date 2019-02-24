@@ -7,5 +7,5 @@ package edu.uw.medhas.mhealthsecurityframework.web.model;
 public interface ResponseHandler {
     void onSuccess(Response response);
 
-    void onError(Error error);
+    void onError(WebError webError);
 }

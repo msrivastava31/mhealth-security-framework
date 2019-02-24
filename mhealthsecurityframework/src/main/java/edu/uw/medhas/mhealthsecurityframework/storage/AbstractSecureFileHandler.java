@@ -59,7 +59,7 @@ public abstract class AbstractSecureFileHandler {
                 objectAsBytes = baos.toByteArray();
             } catch (IOException ioex) {
                 Log.e("AbstractSecureFileHandler::getSecureObjAsBytes",
-                        "Error serializing object", ioex);
+                        "WebError serializing object", ioex);
                 callback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 return;
             }
@@ -81,7 +81,7 @@ public abstract class AbstractSecureFileHandler {
                 storageWriteObject.getSecureFile().setJsonData(true);
             } catch (IOException ioex) {
                 Log.e("AbstractSecureFileHandler::getSecureObjAsBytes",
-                        "Error serializing object", ioex);
+                        "WebError serializing object", ioex);
                 callback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 return;
             }
@@ -117,7 +117,7 @@ public abstract class AbstractSecureFileHandler {
                                             storageReadObject.getClazz()));
                                 } catch (IOException ioex) {
                                     Log.e("AbstractSecureFileHandler::readObjFromBytes",
-                                            "Error deserializing object", ioex);
+                                            "WebError deserializing object", ioex);
                                     callback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                                 }
                             } else {
@@ -126,7 +126,7 @@ public abstract class AbstractSecureFileHandler {
                                     callback.onSuccess((S) ois.readObject());
                                 } catch (IOException | ClassNotFoundException ex) {
                                     Log.e("AbstractSecureFileHandler::readObjFromBytes",
-                                            "Error deserializing object", ex);
+                                            "WebError deserializing object", ex);
                                     callback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                                 }
                             }
@@ -144,7 +144,7 @@ public abstract class AbstractSecureFileHandler {
                             storageReadObject.getClazz()));
                 } catch (IOException ioex) {
                     Log.e("AbstractSecureFileHandler::readObjFromBytes",
-                            "Error deserializing object", ioex);
+                            "WebError deserializing object", ioex);
                     callback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 }
             } else {
@@ -154,7 +154,7 @@ public abstract class AbstractSecureFileHandler {
                     callback.onSuccess((S) ois.readObject());
                 } catch (IOException | ClassNotFoundException ex) {
                     Log.e("AbstractSecureFileHandler::readObjFromBytes",
-                            "Error deserializing object", ex);
+                            "WebError deserializing object", ex);
                     callback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 }
             }
@@ -172,7 +172,7 @@ public abstract class AbstractSecureFileHandler {
                 objectAsBytes = baos.toByteArray();
             } catch (IOException ioex) {
                 Log.e("AbstractSecureFileHandler::getSecureObjAsBytes",
-                        "Error serializing object", ioex);
+                        "WebError serializing object", ioex);
                 throw new SerializationException();
             }
         } else {
@@ -192,7 +192,7 @@ public abstract class AbstractSecureFileHandler {
                 secureFile.setJsonData(true);
             } catch (IOException ioex) {
                 Log.e("AbstractSecureFileHandler::getSecureObjAsBytes",
-                        "Error serializing object", ioex);
+                        "WebError serializing object", ioex);
                 throw new SerializationException();
             }
         }
@@ -216,7 +216,7 @@ public abstract class AbstractSecureFileHandler {
                 return mObjectMapper.readValue(unsecureObjectAsBytes, clazz);
             } catch (IOException ioex) {
                 Log.e("AbstractSecureFileHandler::getSecureObjAsBytes",
-                        "Error deserializing object", ioex);
+                        "WebError deserializing object", ioex);
                 throw new SerializationException();
             }
         } else {
@@ -225,7 +225,7 @@ public abstract class AbstractSecureFileHandler {
                 return (S) ois.readObject();
             } catch (IOException | ClassNotFoundException ex) {
                 Log.e("AbstractSecureFileHandler::getSecureObjAsBytes",
-                        "Error deserializing object", ex);
+                        "WebError deserializing object", ex);
                 throw new SerializationException();
             }
         }

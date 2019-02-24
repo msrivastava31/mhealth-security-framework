@@ -18,7 +18,7 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="SSL Checker"
+            android:text="ACL - Role"
             android:textSize="26dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -33,21 +33,35 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/sslCheckerUrl"
+            android:id="@+id/aclRoleNewRole"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:hint="Any 3rd party URL"
+            android:hint="New Role name"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/aclRoleCurrentUser"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="Current User id"
             android:inputType="text" />
 
         <Button
-            android:id="@+id/sslCheckerBtn"
+            android:id="@+id/aclRoleCreate"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Validate"
+            android:text="Create Role"
+            android:layout_marginBottom="60dp" />
+
+        <Button
+            android:id="@+id/aclRoleDelete"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Delete Role"
             android:layout_marginBottom="60dp" />
 
         <TextView
-            android:id="@+id/sslCheckerOp"
+            android:id="@+id/aclRoleOp"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textSize="17dp"

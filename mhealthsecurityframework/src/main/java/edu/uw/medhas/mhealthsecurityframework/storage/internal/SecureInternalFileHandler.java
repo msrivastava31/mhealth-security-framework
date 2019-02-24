@@ -52,7 +52,7 @@ public class SecureInternalFileHandler extends AbstractSecureFileHandler {
                     storageResultCallback.onSuccess(new StorageResult<>(new StorageResultSuccess()));
                 } catch (IOException ioex) {
                     Log.e("SecureInternalFileHandler::writeData",
-                            "Error serializing object", ioex);
+                            "WebError serializing object", ioex);
                     storageResultCallback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
                 }
             }
@@ -87,7 +87,7 @@ public class SecureInternalFileHandler extends AbstractSecureFileHandler {
             return;
         } catch (IOException ioex) {
             Log.e("SecureInternalFileHandler::readData",
-                    "Error deserializing object", ioex);
+                    "WebError deserializing object", ioex);
             storageResultCallback.onFailure(StorageResultErrorType.SERIALIZATION_ERROR);
             return;
         }
