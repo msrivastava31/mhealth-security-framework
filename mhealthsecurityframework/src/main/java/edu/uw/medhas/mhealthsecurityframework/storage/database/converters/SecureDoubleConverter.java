@@ -13,6 +13,7 @@ import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureDoubl
 import edu.uw.medhas.mhealthsecurityframework.storage.encryption.ByteEncryptor;
 import edu.uw.medhas.mhealthsecurityframework.storage.exception.DecryptionException;
 import edu.uw.medhas.mhealthsecurityframework.storage.exception.EncryptionException;
+import edu.uw.medhas.mhealthsecurityframework.storage.exception.ReauthenticationException;
 import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultErrorType;
 
 /**
@@ -54,8 +55,13 @@ public class SecureDoubleConverter extends AbstractSecureConverter {
         try {
             latch.await();
             if (converterResult.getErrorType().isPresent()) {
-                throw new EncryptionException();
+                if (StorageResultErrorType.REAUTHENTICATION_NEEDED.equals(converterResult.getErrorType().get())) {
+                    throw new ReauthenticationException();
+                } else {
+                    throw new EncryptionException();
+                }
             }
+
             return converterResult.getResult();
         } catch (InterruptedException e) {
             Log.e("SecureDoubleConverter::fromSecureDoubleToEncryptedBytes",
@@ -95,7 +101,11 @@ public class SecureDoubleConverter extends AbstractSecureConverter {
         try {
             latch.await();
             if (converterResult.getErrorType().isPresent()) {
-                throw new DecryptionException();
+                if (StorageResultErrorType.REAUTHENTICATION_NEEDED.equals(converterResult.getErrorType().get())) {
+                    throw new ReauthenticationException();
+                } else {
+                    throw new DecryptionException();
+                }
             }
 
             return new SecureDouble(ByteBuffer.wrap(converterResult.getResult()).getDouble());

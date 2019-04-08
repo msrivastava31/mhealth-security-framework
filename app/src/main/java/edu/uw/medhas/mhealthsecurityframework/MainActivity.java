@@ -15,7 +15,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -49,6 +48,7 @@ import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureFloat
 import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureInteger;
 import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureLong;
 import edu.uw.medhas.mhealthsecurityframework.storage.database.model.SecureString;
+import edu.uw.medhas.mhealthsecurityframework.storage.exception.ReauthenticationException;
 import edu.uw.medhas.mhealthsecurityframework.storage.metadata.StorageReadObject;
 import edu.uw.medhas.mhealthsecurityframework.storage.metadata.StorageWriteObject;
 import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResult;
@@ -124,8 +124,10 @@ public class MainActivity extends SecureActivity
         View newView = null;
         final LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        if (id == R.id.nav_password) {
-            newView = inflater.inflate(R.layout.content_pwstrchecker, null);
+        if (id == R.id.nav_password_ui) {
+            newView = inflater.inflate(R.layout.content_pwdvalidator_ui, null);
+        } else if (id == R.id.nav_password_be) {
+            newView = inflater.inflate(R.layout.content_pwdvalidator_be, null);
         } else if (id == R.id.nav_cache_serializable) {
             newView = inflater.inflate(R.layout.content_cacsto_slz, null);
         } else if (id == R.id.nav_cache_annotation) {
@@ -154,36 +156,30 @@ public class MainActivity extends SecureActivity
         mainLayout.removeAllViews();
         mainLayout.addView(newView);
 
-        if (id == R.id.nav_password) {
-            final EditText editTextPw = (EditText) findViewById(R.id.password);
-            final Button btnCreateAccount = (Button) findViewById(R.id.createAccount);
+        if (id == R.id.nav_password_be) {
+            final EditText editTextPw = (EditText) findViewById(R.id.passwordBe);
+            final TextView editTextOp = (TextView) findViewById(R.id.validatePasswordBeOp);
+            final Button btnValidatePassword = (Button) findViewById(R.id.validatePasswordBe);
 
-            btnCreateAccount.setOnClickListener(new View.OnClickListener() {
+            btnValidatePassword.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    editTextOp.setText("");
                     final String passwordStr = editTextPw.getText().toString();
 
                     try {
                         PasswordUtils.validatePassword(passwordStr);
-                        Toast.makeText(getApplicationContext(),
-                                "Password is strong", Toast.LENGTH_LONG).show();
+                        editTextOp.setText("Password is strong");
                     } catch (PasswordTooShortException ptsex) {
-                        Toast.makeText(getApplicationContext(),
-                                "Password is too small", Toast.LENGTH_LONG).show();
+                        editTextOp.setText("Password is too small");
                     } catch (PasswordNoUpperCaseCharacterException pnuccex) {
-                        Toast.makeText(getApplicationContext(),
-                                "Password has no upper case character",
-                                Toast.LENGTH_LONG).show();
+                        editTextOp.setText("Password has no upper case character");
                     } catch (PasswordNoLowerCaseCharacterException pnlccex) {
-                        Toast.makeText(getApplicationContext(),
-                                "Password has no lower case character",
-                                Toast.LENGTH_LONG).show();
+                        editTextOp.setText("Password has no lower case character");
                     } catch (PasswordNoNumberCharacterException pnncex) {
-                        Toast.makeText(getApplicationContext(),
-                                "Password has no number", Toast.LENGTH_LONG).show();
+                        editTextOp.setText("Password has no number");
                     } catch (PasswordNoSpecialCharacterException pnscex) {
-                        Toast.makeText(getApplicationContext(), "Password has no special character",
-                                Toast.LENGTH_LONG).show();
+                        editTextOp.setText("Password has no special character");
                     }
                 }
             });
@@ -196,6 +192,7 @@ public class MainActivity extends SecureActivity
             btnStore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final StorageWriteObject<SecureSerializableModel> writeObject =
                             new StorageWriteObject<>("cachestorage-serializable.txt",
                                     new SecureSerializableModel(editTextInp.getText().toString()));
@@ -223,6 +220,7 @@ public class MainActivity extends SecureActivity
             btnRetrieve.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final StorageReadObject<SecureSerializableModel> readObject =
                             new StorageReadObject<>("cachestorage-serializable.txt",
                                     SecureSerializableModel.class);
@@ -257,6 +255,7 @@ public class MainActivity extends SecureActivity
             btnStore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final SecureAnnotatedModel sam = new SecureAnnotatedModel();
                     sam.setData(editTextInp.getText().toString());
 
@@ -287,6 +286,7 @@ public class MainActivity extends SecureActivity
             btnRetrieve.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final StorageReadObject<SecureAnnotatedModel> readObject =
                             new StorageReadObject<>("cachestorage-annotation.txt",
                                     SecureAnnotatedModel.class);
@@ -320,6 +320,7 @@ public class MainActivity extends SecureActivity
             btnStore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final StorageWriteObject<SecureSerializableModel> writeObject =
                             new StorageWriteObject<>("internalstorage-serializable.txt",
                                     new SecureSerializableModel(editTextInp.getText().toString()));
@@ -346,6 +347,7 @@ public class MainActivity extends SecureActivity
             btnRetrieve.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final StorageReadObject<SecureSerializableModel> readObject =
                             new StorageReadObject<>("internalstorage-serializable.txt",
                                     SecureSerializableModel.class);
@@ -380,6 +382,7 @@ public class MainActivity extends SecureActivity
             btnStore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final SecureAnnotatedModel sam = new SecureAnnotatedModel();
                     sam.setData(editTextInp.getText().toString());
 
@@ -409,6 +412,7 @@ public class MainActivity extends SecureActivity
             btnRetrieve.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final StorageReadObject<SecureAnnotatedModel> readObject =
                             new StorageReadObject<>("internalstorage-annotation.txt",
                                     SecureAnnotatedModel.class);
@@ -442,6 +446,7 @@ public class MainActivity extends SecureActivity
             btnStore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final StorageWriteObject<SecureSerializableModel> writeObject =
                             new StorageWriteObject<>("externalstorage-serializable.txt",
                                     new SecureSerializableModel(editTextInp.getText().toString()));
@@ -473,6 +478,7 @@ public class MainActivity extends SecureActivity
 
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final StorageReadObject<SecureSerializableModel> readObject =
                             new StorageReadObject<>("externalstorage-serializable.txt",
                                     SecureSerializableModel.class);
@@ -507,6 +513,7 @@ public class MainActivity extends SecureActivity
             btnStore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final SecureAnnotatedModel sam = new SecureAnnotatedModel();
                     sam.setData(editTextInp.getText().toString());
 
@@ -537,6 +544,7 @@ public class MainActivity extends SecureActivity
             btnRetrieve.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final StorageReadObject<SecureAnnotatedModel> readObject =
                             new StorageReadObject<>("externalstorage-annotation.txt",
                                     SecureAnnotatedModel.class);
@@ -597,10 +605,13 @@ public class MainActivity extends SecureActivity
                                 editTextOp.setText(id.toString());
                             }
                         });
+                    } catch (ReauthenticationException raex) {
+                        raex.printStackTrace();
+                        startAuthenticationProcess();
                     } catch (Exception e) {
                         e.printStackTrace();
+                        editTextOp.setText(e.getClass().getName());
                     }
-
                 }
             });
 
@@ -621,8 +632,7 @@ public class MainActivity extends SecureActivity
                                         + ", Long: " +String.valueOf(object.getLongValue().getValue())
                                         + ", Float: " + String.valueOf(object.getFloatValue().getValue())
                                         + ", Double: " + String.valueOf(object.getDoubleValue().getValue())
-                                        + ", String: " + object.getStringValue().getValue()
-                                        + ", SimString: " + object.getSimpleStr());
+                                        + ", String: " + object.getStringValue().getValue());
 
                             }
                         });
@@ -641,6 +651,7 @@ public class MainActivity extends SecureActivity
 
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final String url = editTextUrl.getText().toString();
 
                     final TestWebClient webClient = new TestWebClient(
@@ -674,6 +685,7 @@ public class MainActivity extends SecureActivity
 
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final User user = new User();
                     user.setId(editTextNewUser.getText().toString());
                     user.setName(user.getId() + "-name");
@@ -697,6 +709,7 @@ public class MainActivity extends SecureActivity
             btnDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final String userId = editTextNewUser.getText().toString();
                     final AuthContext context = new AuthContext(editTextCurrentUser.getText().toString());
 
@@ -727,6 +740,7 @@ public class MainActivity extends SecureActivity
 
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final Role role = new Role();
                     role.setName(editTextNewRole.getText().toString());
 
@@ -749,6 +763,7 @@ public class MainActivity extends SecureActivity
             btnDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final String roleId = editTextNewRole.getText().toString();
                     final AuthContext context = new AuthContext(editTextCurrentUser.getText().toString());
 
@@ -786,6 +801,7 @@ public class MainActivity extends SecureActivity
 
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final String userId = editTextUser.getText().toString();
                     final String roleName = editTextRole.getText().toString();
 
@@ -794,7 +810,7 @@ public class MainActivity extends SecureActivity
                     userService.assignRoleToUser(userId, roleName, context, new ResultHandler<UserRole>() {
                         @Override
                         public void onSuccess(UserRole result) {
-                            editTextOp.setText("Successfully assigned Role: " + roleName + " to User: " + userId);
+                            editTextOp.setText("Successfully assigned Role: " + roleName + " to user: " + userId);
                         }
 
                         @Override
@@ -809,6 +825,7 @@ public class MainActivity extends SecureActivity
 
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final String roleName = editTextRole.getText().toString();
                     final String resourceName = editTextResource.getText().toString();
                     final String opName = editTextOperation.getText().toString();
@@ -834,6 +851,7 @@ public class MainActivity extends SecureActivity
             btnDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final String roleName = editTextRole.getText().toString();
                     final String resourceName = editTextResource.getText().toString();
                     final String opName = editTextOperation.getText().toString();
@@ -859,6 +877,7 @@ public class MainActivity extends SecureActivity
 
                 @Override
                 public void onClick(View v) {
+                    editTextOp.setText("");
                     final String userId = editTextUser.getText().toString();
                     final String resourceName = editTextResource.getText().toString();
                     final String opName = editTextOperation.getText().toString();

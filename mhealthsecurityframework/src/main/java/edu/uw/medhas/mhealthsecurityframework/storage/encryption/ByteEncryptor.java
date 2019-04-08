@@ -1,6 +1,7 @@
 package edu.uw.medhas.mhealthsecurityframework.storage.encryption;
 
 import android.hardware.fingerprint.FingerprintManager;
+import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Log;
 
 import java.io.IOException;
@@ -72,6 +73,10 @@ public class ByteEncryptor {
                     callback.onFailure(storageResultErrorType);
                 }
             });
+        } catch (UserNotAuthenticatedException unaex) {
+            Log.e("ByteEncryptor::encrypt",
+                    "User not authenticated recently", unaex);
+            callback.onFailure(StorageResultErrorType.REAUTHENTICATION_NEEDED);
         } catch (IOException | CertificateException | UnrecoverableEntryException
                 | NoSuchProviderException | KeyStoreException | NoSuchAlgorithmException
                 | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException ex) {
@@ -121,6 +126,10 @@ public class ByteEncryptor {
                     callback.onFailure(storageResultErrorType);
                 }
             });
+        } catch (UserNotAuthenticatedException unaex) {
+            Log.e("ByteEncryptor::decrypt",
+                    "User not authenticated recently", unaex);
+            callback.onFailure(StorageResultErrorType.REAUTHENTICATION_NEEDED);
         } catch (IOException | CertificateException | UnrecoverableEntryException
                 | NoSuchProviderException | KeyStoreException | NoSuchAlgorithmException
                 | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException ex) {

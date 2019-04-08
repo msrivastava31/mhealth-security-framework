@@ -3,11 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <item android:title="Password">
+    <item android:title="Password Validator">
         <menu>
             <item
-                android:id="@+id/nav_password"
-                android:title="Password Strength Checker" />
+                android:id="@+id/nav_password_ui"
+                android:title="Password UI Validator" />
+
+            <item
+                android:id="@+id/nav_password_be"
+                android:title="Password Backend Validator" />
         </menu>
     </item>
 

@@ -22,6 +22,6 @@
 
     <include
         android:id="@+id/main_container"
-        layout="@layout/content_pwstrchecker" />
+        layout="@layout/content_pwdvalidator_ui" />
 
 </android.support.design.widget.CoordinatorLayout>

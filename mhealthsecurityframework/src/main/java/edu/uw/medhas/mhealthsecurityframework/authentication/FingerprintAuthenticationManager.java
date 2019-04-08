@@ -4,6 +4,8 @@ import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.CancellationSignal;
 
+import java.util.Optional;
+
 import edu.uw.medhas.mhealthsecurityframework.storage.encryption.EncryptionServiceCallback;
 import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultErrorType;
 
@@ -23,8 +25,9 @@ public class FingerprintAuthenticationManager implements AuthenticationManager {
         mKeyguardManager = keyguardManager;
     }
 
-    public boolean isUserAuthenticationPossible() {
-        return true;
+    @Override
+    public Optional<Integer> getUserAuthenticationValidityDurationSeconds() {
+        return Optional.empty();
     }
 
     @Override

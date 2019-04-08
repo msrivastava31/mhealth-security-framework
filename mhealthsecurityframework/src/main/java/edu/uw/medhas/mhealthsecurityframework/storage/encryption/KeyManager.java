@@ -73,13 +73,20 @@ public class KeyManager {
         SecretKey secretKey = null;
 
         if (keyEntry == null) {
-            final KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec.Builder(keyAlias,
+            final KeyGenParameterSpec.Builder keyGenParameterSpecBuilder = new KeyGenParameterSpec.Builder(keyAlias,
                     KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
                     .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
-                    .setUserAuthenticationRequired(authenticationManager.isUserAuthenticationPossible())
-                    .setKeySize(128)
-                    .build();
+                    .setUserAuthenticationRequired(true)
+                    .setKeySize(128);
+
+            if (authenticationManager.getUserAuthenticationValidityDurationSeconds().isPresent()) {
+                keyGenParameterSpecBuilder.setUserAuthenticationValidityDurationSeconds(
+                        authenticationManager.getUserAuthenticationValidityDurationSeconds().get());
+            }
+
+
+            final KeyGenParameterSpec keyGenParameterSpec = keyGenParameterSpecBuilder.build();
 
             final KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,
                     sAndroidKeyStore);

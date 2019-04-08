@@ -2,6 +2,8 @@ package edu.uw.medhas.mhealthsecurityframework.authentication;
 
 import android.hardware.fingerprint.FingerprintManager;
 
+import java.util.Optional;
+
 import edu.uw.medhas.mhealthsecurityframework.storage.encryption.EncryptionServiceCallback;
 
 /**
@@ -10,8 +12,8 @@ import edu.uw.medhas.mhealthsecurityframework.storage.encryption.EncryptionServi
 
 public class BasicAuthenticationManager implements AuthenticationManager {
     @Override
-    public boolean isUserAuthenticationPossible() {
-        return false;
+    public Optional<Integer> getUserAuthenticationValidityDurationSeconds() {
+        return Optional.of(60);
     }
 
     @Override

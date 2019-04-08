@@ -1,13 +1,16 @@
 package edu.uw.medhas.mhealthsecurityframework.activity;
 
 import android.app.KeyguardManager;
+import android.content.Intent;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
 import edu.uw.medhas.mhealthsecurityframework.acl.service.AclServiceFactory;
 import edu.uw.medhas.mhealthsecurityframework.authentication.AuthenticationManagerFactory;
 import edu.uw.medhas.mhealthsecurityframework.storage.cache.SecureCacheHandler;
+import edu.uw.medhas.mhealthsecurityframework.storage.exception.ReauthenticationException;
 import edu.uw.medhas.mhealthsecurityframework.storage.external.SecureExternalFileHandler;
 import edu.uw.medhas.mhealthsecurityframework.storage.internal.SecureInternalFileHandler;
 
@@ -16,6 +19,8 @@ import edu.uw.medhas.mhealthsecurityframework.storage.internal.SecureInternalFil
  */
 
 public class SecureActivity extends AppCompatActivity {
+    private static final int REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 17;
+
     private SecureInternalFileHandler mSecureInternalFileHandler = null;
     private SecureExternalFileHandler mSecureExternalFileHandler = null;
     private SecureCacheHandler mSecureCacheHandler = null;
@@ -47,5 +52,27 @@ public class SecureActivity extends AppCompatActivity {
 
     public SecureCacheHandler getSecureCacheHandler() {
         return mSecureCacheHandler;
+    }
+
+    public void startAuthenticationProcess() {
+        final KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+        final Intent intent = keyguardManager.createConfirmDeviceCredentialIntent(null, null);
+        if (intent != null) {
+            startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS);
+        } else {
+            Toast.makeText(getApplicationContext(),
+                    "Error starting authentication process", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS) {
+            if (resultCode != RESULT_OK) {
+                throw new ReauthenticationException();
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 }
