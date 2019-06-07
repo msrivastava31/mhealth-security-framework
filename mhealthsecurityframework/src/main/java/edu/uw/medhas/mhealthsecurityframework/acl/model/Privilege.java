@@ -7,7 +7,12 @@ import android.support.annotation.NonNull;
 import java.time.Instant;
 
 /**
- * Created by medhas on 2/18/19.
+ * This is the Privilege model class that extends AbstractAuditModel class.
+ * It contains columns that map to Role Id, Resource Id and Operation Id. This class captures the privilege
+ * that a role has to perform an operation on a resource.
+ *
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 
 @Entity(tableName = "privileges", primaryKeys = {"role_id", "resource_id", "operation_id"})

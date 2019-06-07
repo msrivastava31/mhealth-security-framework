@@ -9,7 +9,11 @@ import android.support.annotation.NonNull;
 import java.time.Instant;
 
 /**
- * Created by medhas on 2/18/19.
+ * This is the Operation model class that extends AbstractAuditModel class.
+ * It contains columns that map to Operation Id and Operation name.
+ *
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 
 @Entity(tableName = "operations",

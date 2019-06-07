@@ -5,11 +5,6 @@ import android.util.Log;
 import java.time.Instant;
 
 import edu.uw.medhas.mhealthsecurityframework.acl.constants.DbConstants;
-import edu.uw.medhas.mhealthsecurityframework.acl.dao.OperationDao;
-import edu.uw.medhas.mhealthsecurityframework.acl.dao.PrivilegeDao;
-import edu.uw.medhas.mhealthsecurityframework.acl.dao.ResourceDao;
-import edu.uw.medhas.mhealthsecurityframework.acl.dao.RoleDao;
-import edu.uw.medhas.mhealthsecurityframework.acl.dao.UserDao;
 import edu.uw.medhas.mhealthsecurityframework.acl.db.AccessControlDb;
 import edu.uw.medhas.mhealthsecurityframework.acl.db.DbError;
 import edu.uw.medhas.mhealthsecurityframework.acl.db.ResultHandler;
@@ -21,6 +16,11 @@ import edu.uw.medhas.mhealthsecurityframework.acl.model.Role;
 import edu.uw.medhas.mhealthsecurityframework.acl.service.PrivilegeService;
 
 /**
+ * This class implements the PrivilegeService interface.
+ * It contains methods to create a Privilege, delete a Privilege(and delete corresponding
+ * resource and operation) and check for authorization (if a particular role can perform an operation on a resource).
+ *
+ * @author Medha Srivastava
  * Created by medhas on 2/20/19.
  */
 
@@ -31,9 +31,18 @@ public class PrivilegeServiceImpl implements PrivilegeService {
         mAclDb = aclDb;
     }
 
+    /**
+     * Creates a privilege on a role to perform an operation on a resource.
+     * @param roleName Name of the role
+     * @param resourceName Name of the resource
+     * @param operationName Name of the operation
+     * @param authContext details of the current user
+     * @param resultHandler listener to store the result of the query
+     */
     @Override
     public void createPrivilege(final String roleName, final String resourceName, final String operationName,
                                 final AuthContext authContext, final ResultHandler<Privilege> resultHandler) {
+        // Check if the current user is authorized to perform this operation
         isAllowed(authContext.getUserId(), DbConstants.PRIVILEGE_RESOURCE, DbConstants.CREATE_OP,
                 new ResultHandler<Boolean>() {
                     @Override
@@ -102,9 +111,18 @@ public class PrivilegeServiceImpl implements PrivilegeService {
         );
     }
 
+    /**
+     * Deletes a privilege on a role to perform an operation on a resource.
+     * @param roleName Name of the role
+     * @param resourceName Name of the resource
+     * @param operationName Name of the operation
+     * @param authContext details of the current user
+     * @param resultHandler listener to store the result of the query
+     */
     @Override
     public void deletePrivilege(final String roleName, final String resourceName, final String operationName,
                                 final AuthContext authContext, final ResultHandler<Void> resultHandler) {
+        // Check if the current user is authorized to perform this operation
         isAllowed(authContext.getUserId(), DbConstants.PRIVILEGE_RESOURCE, DbConstants.DELETE_OP,
                 new ResultHandler<Boolean>() {
                     @Override
@@ -155,6 +173,13 @@ public class PrivilegeServiceImpl implements PrivilegeService {
         );
     }
 
+    /**
+     * Checks for authorization if a particular user can perform an operation on a resource.
+     * @param userId User Id
+     * @param resourceName Name of the resource
+     * @param operationName Name of the operation
+     * @param resultHandler listener to store the result of the query
+     */
     @Override
     public void isAllowed(final String userId, final String resourceName, final String operationName,
                           final ResultHandler<Boolean> resultHandler) {
@@ -166,9 +191,16 @@ public class PrivilegeServiceImpl implements PrivilegeService {
         }
     }
 
+    /**
+     * Delete the resource when a privilege is deleted
+     * @param resourceName Name of the resource to be deleted
+     * @param authContext details of the current user
+     * @param resultHandler listener to store the result of the query
+     */
     @Override
     public void deleteResource(final String resourceName, final AuthContext authContext,
                                final ResultHandler<Void> resultHandler) {
+        // Check if the current user is authorized to perform this operation
         isAllowed(authContext.getUserId(), DbConstants.PRIVILEGE_RESOURCE, DbConstants.DELETE_OP,
                 new ResultHandler<Boolean>() {
                     @Override
@@ -208,9 +240,16 @@ public class PrivilegeServiceImpl implements PrivilegeService {
         );
     }
 
+    /**
+     * Delete the operation when a privilege is deleted
+     * @param operationName Name of the operation to be deleted
+     * @param authContext details of the current user
+     * @param resultHandler listener to store the result of the query
+     */
     @Override
     public void deleteOperation(final String operationName, final AuthContext authContext,
                                 final ResultHandler<Void> resultHandler) {
+        // Check if the current user is authorized to perform this operation
         isAllowed(authContext.getUserId(), DbConstants.PRIVILEGE_RESOURCE, DbConstants.DELETE_OP,
                 new ResultHandler<Boolean>() {
                     @Override

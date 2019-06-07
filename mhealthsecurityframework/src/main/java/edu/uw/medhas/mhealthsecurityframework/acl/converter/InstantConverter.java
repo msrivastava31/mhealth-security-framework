@@ -4,7 +4,10 @@ import android.arch.persistence.room.TypeConverter;
 import java.time.Instant;
 
 /**
- * Created by medhasrivastava on 2/18/19.
+ * This class converts the instant to timestamp and vice versa.
+ *
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 
 public class InstantConverter {

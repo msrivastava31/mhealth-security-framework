@@ -636,6 +636,9 @@ public class MainActivity extends SecureActivity
 
                             }
                         });
+                    } catch (ReauthenticationException raex) {
+                        raex.printStackTrace();
+                        startAuthenticationProcess();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

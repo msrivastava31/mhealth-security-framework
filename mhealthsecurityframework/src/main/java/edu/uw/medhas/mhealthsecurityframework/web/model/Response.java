@@ -4,7 +4,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
- * Created by medhas on 2/17/19.
+ * This class represents the Response object and its characteristics.
+ *
+ * @author Medha Srivastava
+ * Created on 2/17/19.
  */
 
 public class Response {

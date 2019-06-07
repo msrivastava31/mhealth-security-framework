@@ -7,7 +7,11 @@ import android.support.annotation.NonNull;
 import java.time.Instant;
 
 /**
- * Created by medhas on 2/18/19.
+ * This is the UserRole model class that extends AbstractAuditModel class.
+ * It contains columns that map to User Id and Role Id. This class captures the User-Role relationship.
+ *
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 
 @Entity(tableName = "user_role", primaryKeys = {"user_id", "role_id"})

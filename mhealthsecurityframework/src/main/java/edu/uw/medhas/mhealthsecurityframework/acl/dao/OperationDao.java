@@ -10,7 +10,12 @@ import android.arch.persistence.room.Update;
 import edu.uw.medhas.mhealthsecurityframework.acl.model.Operation;
 
 /**
- * Created by medhas on 2/18/19.
+ * This interface is the Operation Dao used to interact with the database.
+ * It contains methods to insert an operation,view an operation (by Id and name), update an operation
+ * and delete an operation.
+ *
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 @Dao
 public interface OperationDao {

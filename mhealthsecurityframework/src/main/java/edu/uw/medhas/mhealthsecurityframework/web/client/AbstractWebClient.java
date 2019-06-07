@@ -14,6 +14,8 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -27,7 +29,13 @@ import edu.uw.medhas.mhealthsecurityframework.web.model.WebError;
 import edu.uw.medhas.mhealthsecurityframework.web.model.ResponseHandler;
 
 /**
- * Created by medhas on 2/12/19.
+ * This is an abstract class that extends Android AsyncTask class.
+ * It is a Web Client that checks if the remote server/API (that app is trying to connect to)
+ * is an SSL/TLs compliant server and has valid SSL/TLS certificates. It conducts this check on an
+ * asynchronous thread.
+ *
+ * @author Medha Srivastava
+ * Created on 2/12/19.
  */
 
 public abstract class AbstractWebClient extends AsyncTask<Request, Void, Response> {

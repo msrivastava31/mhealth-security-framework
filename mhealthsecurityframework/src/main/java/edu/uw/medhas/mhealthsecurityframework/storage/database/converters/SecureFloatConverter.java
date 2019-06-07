@@ -17,35 +17,53 @@ import edu.uw.medhas.mhealthsecurityframework.storage.exception.Reauthentication
 import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultErrorType;
 
 /**
- * Created by medhasrivastava on 1/21/19.
+ * This class extends the AbstractSecureConverter class.
+ * It contains methods that convert a SecureFloat object to encrypted bytes and vice versa
+ * using Android Room framework's TypeConverter annotation.
+ *
+ * @author Medha Srivastava
+ * Created on 1/21/19.
  */
 
 public class SecureFloatConverter extends AbstractSecureConverter {
+    /**
+     * Encrypts the sensitive float object prior to storing it in database storage.
+     * @param value sensitive float object
+     * @return byte array of the encrypted object
+     */
     @TypeConverter
     public byte[] fromSecureFloatToEncryptedBytes(SecureFloat value){
         if (value == null) {
             return null;
         }
 
+        // Convert the object into byte stream
         final byte[] objectAsBytes = ByteBuffer.allocate(4).putFloat(value.getValue()).array();
 
         final ConverterEncryptionResult converterResult = new ConverterEncryptionResult();
+
+        // Initialize a countdown latch to wait for 1 process
         final CountDownLatch latch = new CountDownLatch(1);
 
+        // Encrypt the object
         ByteEncryptor.encrypt(getKeyAlias(), objectAsBytes, new BasicAuthenticationManager(),
                 new StorageServiceCallback<byte[]>() {
+
+                    // On successful authentication, set the result and set the count down
                     @Override
                     public void onSuccess(byte[] result) {
                         converterResult.setResult(result);
                         latch.countDown();
                     }
 
+                    // On unsuccessful authentication, set the error and set the count down
                     @Override
                     public void onFailure(StorageResultErrorType storageResultErrorType) {
                         converterResult.setErrorType(storageResultErrorType);
                         latch.countDown();
                     }
 
+                    // Wait for authentication to complete
                     @Override
                     public void onWaitingForAuthentication() {
 
@@ -53,7 +71,9 @@ public class SecureFloatConverter extends AbstractSecureConverter {
                 });
 
         try {
+            // Block the thread until count reaches zero
             latch.await();
+            // Perform re-authentication if authentication error is present
             if (converterResult.getErrorType().isPresent()) {
                 if (StorageResultErrorType.REAUTHENTICATION_NEEDED.equals(converterResult.getErrorType().get())) {
                     throw new ReauthenticationException();
@@ -69,6 +89,11 @@ public class SecureFloatConverter extends AbstractSecureConverter {
         }
     }
 
+    /**
+     * Retrieves the sensitive float object after decrypting it.
+     * @param encryptedValue byte array of the encrypted object
+     * @return SecureFloat object
+     */
     @TypeConverter
     public SecureFloat fromEncryptedBytesToSecureFloat(byte[] encryptedValue) {
         if (encryptedValue == null) {
@@ -76,29 +101,37 @@ public class SecureFloatConverter extends AbstractSecureConverter {
         }
 
         final ConverterEncryptionResult converterResult = new ConverterEncryptionResult();
+        // Initialize a countdown latch to wait for 1 process
         final CountDownLatch latch = new CountDownLatch(1);
 
+        // Decrypt the encrypted object
         ByteEncryptor.decrypt(getKeyAlias(), encryptedValue, new BasicAuthenticationManager(),
                 new StorageServiceCallback<byte[]>() {
+
+                    // On successful authentication, set the result and set the count down
                     @Override
                     public void onSuccess(byte[] result) {
                         converterResult.setResult(result);
                         latch.countDown();
                     }
 
+                    // On unsuccessful authentication, set the error and set the count down
                     @Override
                     public void onFailure(StorageResultErrorType storageResultErrorType) {
                         converterResult.setErrorType(storageResultErrorType);
                         latch.countDown();
                     }
 
+                    // Wait for authentication to complete
                     @Override
                     public void onWaitingForAuthentication() {
                     }
                 });
 
         try {
+            // Block the thread until count reaches zero
             latch.await();
+            // Perform re-authentication if authentication error is present
             if (converterResult.getErrorType().isPresent()) {
                 if (StorageResultErrorType.REAUTHENTICATION_NEEDED.equals(converterResult.getErrorType().get())) {
                     throw new ReauthenticationException();

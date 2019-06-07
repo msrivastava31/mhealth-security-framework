@@ -10,7 +10,11 @@ import edu.uw.medhas.mhealthsecurityframework.acl.model.Privilege;
 import edu.uw.medhas.mhealthsecurityframework.acl.model.UserRole;
 
 /**
- * Created by medhas on 2/18/19.
+ * This interface is the UserRole Dao used to interact with the database.
+ * It contains methods to insert a UserRole and delete a UserRole(by user id and role id).
+ *
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 @Dao
 public interface UserRoleDao {

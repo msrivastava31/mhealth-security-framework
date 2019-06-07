@@ -5,7 +5,10 @@ import java.util.Optional;
 import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultErrorType;
 
 /**
- * Created by medhas on 2/9/19.
+ * This class contains the details of the result.
+ *
+ * @author Medha Srivastava
+ * Created on 2/9/19.
  */
 
 public class ConverterEncryptionResult {

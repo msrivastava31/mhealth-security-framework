@@ -10,7 +10,12 @@ import android.arch.persistence.room.Update;
 import edu.uw.medhas.mhealthsecurityframework.acl.model.User;
 
 /**
- * Created by medhas on 2/18/19.
+ * This interface is the User Dao used to interact with the database.
+ * It contains methods to insert a user,view a user (by Id and name), update a user
+ * and delete a user.
+ *
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 @Dao
 public interface UserDao {

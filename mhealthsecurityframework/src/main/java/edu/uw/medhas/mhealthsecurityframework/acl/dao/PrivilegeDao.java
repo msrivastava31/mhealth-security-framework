@@ -9,7 +9,12 @@ import android.arch.persistence.room.Query;
 import edu.uw.medhas.mhealthsecurityframework.acl.model.Privilege;
 
 /**
- * Created by medhas on 2/18/19.
+ * This interface is the Privilege Dao used to interact with the database.
+ * It contains methods to insert a privilege, delete a privilege (by name, by role,
+ * by resource, by operation) and check authorization of a user.
+ *
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 @Dao
 public interface PrivilegeDao {
@@ -28,6 +33,14 @@ public interface PrivilegeDao {
     @Query("Delete from privileges where operation_id = :operationId")
     void deleteByOperation(long operationId);
 
+    /**
+     * Check if a given user is allowed to perform given operation on a given resource.
+     *
+     * @param userId user Id
+     * @param resourceName Name of the resource
+     * @param operationName Name of the operation
+     * @return
+     */
     @Query("SELECT COUNT(*) FROM privileges p" +
             " JOIN resources rs" +
             " ON rs.id = p.resource_id" +

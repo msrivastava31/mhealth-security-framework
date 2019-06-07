@@ -1,7 +1,10 @@
 package edu.uw.medhas.mhealthsecurityframework.acl.constants;
 
 /**
- * Created by medhas on 2/18/19.
+ * This class contains constants related to Database.
+ * 
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 
 public class DbConstants {

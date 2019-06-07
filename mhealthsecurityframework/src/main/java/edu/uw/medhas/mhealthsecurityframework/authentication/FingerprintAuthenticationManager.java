@@ -10,7 +10,12 @@ import edu.uw.medhas.mhealthsecurityframework.storage.encryption.EncryptionServi
 import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultErrorType;
 
 /**
- * Created by medhas on 2/4/19.
+ * This class implements the interface AuthenticationManager.
+ * It contains methods that initiate the authentication process
+ * using fingerprint.
+ *
+ * @author Medha Srivastava
+ * Created on 2/4/19.
  */
 
 public class FingerprintAuthenticationManager implements AuthenticationManager {
@@ -19,28 +24,52 @@ public class FingerprintAuthenticationManager implements AuthenticationManager {
 
     private final CancellationSignal mSignal = new CancellationSignal();
 
+    /**
+     * Constructs an object of FingerprintAuthenticationManager.
+     *
+     * @param fingerprintManager Android fingerprintManager object
+     * @param keyguardManager keyguardManager object
+     */
     public FingerprintAuthenticationManager(FingerprintManager fingerprintManager,
                                             KeyguardManager keyguardManager) {
         mFingerprintManager = fingerprintManager;
         mKeyguardManager = keyguardManager;
     }
 
+    /**
+     * This method returns the duration for which the authentication
+     * will stay valid.
+     *
+     * @return duration for which authentication will stay valid
+     */
     @Override
     public Optional<Integer> getUserAuthenticationValidityDurationSeconds() {
         return Optional.empty();
     }
 
+    /**
+     * This method performs fingerprint authentication before
+     * storing /retrieving sensitive data.
+     *
+     * @param cryptoObject object used in the authentication process
+     * @param callback Used for encryption/decryption on successful authentication
+     */
     @Override
     public void performAuthentication(FingerprintManager.CryptoObject cryptoObject,
                                       final EncryptionServiceCallback callback) {
+
+        // Check for enrolled (registered) fingerprints.
         if (!mFingerprintManager.hasEnrolledFingerprints()) {
             callback.onFailure(StorageResultErrorType.NO_FINGERPRINT_AVAILABLE);
             return;
-        } else if (!mKeyguardManager.isKeyguardSecure()) {
+        }
+        // Check if password/pin authentication is enabled.
+        else if (!mKeyguardManager.isKeyguardSecure()) {
             callback.onFailure(StorageResultErrorType.KEUGUARD_UNSECURE);
             return;
         }
 
+        // Initiating fingerprint authentication process.
         mFingerprintManager.authenticate(cryptoObject,
                 mSignal,
                 0,

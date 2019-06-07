@@ -1,7 +1,10 @@
 package edu.uw.medhas.mhealthsecurityframework.storage.database.model;
 
 /**
- * Created by medhasrivastava on 1/28/19.
+ * This class is a Wrapper of Long object and signifies a sensitive Long object.
+ *
+ * @author Medha Srivastava
+ * Created on 1/28/19.
  */
 
 public class SecureLong {

@@ -14,7 +14,12 @@ import edu.uw.medhas.mhealthsecurityframework.password.exception.PasswordNoUpper
 import edu.uw.medhas.mhealthsecurityframework.password.exception.PasswordTooShortException;
 
 /**
- * Created by medhas on 10/20/18.
+ * This class extends the Android AppCompatEditText component class.
+ * It is a Password UI component that automatically checks the strength of the password entered
+ * in it and raises an appropriate error.
+ *
+ * @author Medha Srivastava
+ * Created on 10/20/18.
  */
 
 public class PasswordEditText extends AppCompatEditText {
@@ -33,6 +38,10 @@ public class PasswordEditText extends AppCompatEditText {
         setPasswordStrengthCheckListener();
     }
 
+    /**
+     * This method is a listener that listens to the characters entered in the Password UI component
+     * and on the change of focus throws an appropriate error after checking the strength of the password entered.
+     */
     private void setPasswordStrengthCheckListener() {
         setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override

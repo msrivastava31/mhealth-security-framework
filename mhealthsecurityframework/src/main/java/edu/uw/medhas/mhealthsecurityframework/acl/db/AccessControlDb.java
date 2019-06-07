@@ -19,7 +19,11 @@ import edu.uw.medhas.mhealthsecurityframework.acl.model.User;
 import edu.uw.medhas.mhealthsecurityframework.acl.model.UserRole;
 
 /**
- * Created by medhas on 2/18/19.
+ * This is an abstract class that represents the database and has tables for User, Role, Privilege,
+ * Operation and Resource.
+ *
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 
 @Database(entities = {

@@ -24,34 +24,71 @@ import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultErrorT
 import edu.uw.medhas.mhealthsecurityframework.storage.result.StorageResultSuccess;
 
 /**
- * Created by medhas on 5/18/18.
+ * This class extends the abstract class AbstractSecureFileHandler.
+ * It also provides methods that handle read and write operations of sensitive/non-sensitive data
+ * from/to an External Storage in an Android phone.
+ *
+ * For secure storage (write) of sensitive data, a fingerprint/pin authentication is required.
+ * If authentication is successful, data is encrypted and stored in external storage .
+ * Similarly, for a secure retrieval(read) of sensitive data, successful authentication leads to
+ * decryption of data and retrieval from external storage.
+ *
+ * For a non-sensitive data, no encryption/decryption is performed. Simply,
+ * an object to byte stream conversion (& vice-versa) is done while storing (or retrieving) it.
+ *
+ * @author Medha Srivastava
+ * Created on 5/18/18
+ *
  */
 
 public class SecureExternalFileHandler extends AbstractSecureFileHandler {
+    /**
+     * Constructs a SecureExternalFileHandler object with given context.
+     *
+     * @param context the Android context
+     */
     public SecureExternalFileHandler(Context context) {
         super(context);
     }
 
+    /**
+     * Overridden method of superclass. Returns the alias for encryption key for external storage.
+     *
+     * @return String alias
+     */
     @Override
     protected String getKeyAlias() {
         return "mhealth-security-framework-external-storage";
     }
 
+    /**
+     * Writes the sensitive/non-sensitive data to external storage. Performs encryption
+     * in case of sensitive data before storing it.
+     *
+     * @param environmentDir the directory in the external storage
+     * @param storageWriteObject the object to be written(stored)
+     * @param storageResultCallback the object to store the result
+     */
     public <S> void writeData(final String environmentDir,
                               final StorageWriteObject<S> storageWriteObject,
                               final StorageResultCallback<StorageResultSuccess> storageResultCallback) {
+
+        // Check for the validity of environment directory in the external storage.
         if (!getContext().getExternalFilesDir(environmentDir).exists()) {
             storageResultCallback.onFailure(StorageResultErrorType.INVALID_ENVIRONMENT_DIR);
             return;
         }
 
+        // Convert the object into byte stream and encrypt the data if it is sensitive.
         getSecureObjAsBytes(storageWriteObject, new StorageServiceCallback<byte[]>() {
 
+            // Wait for authentication before storing sensitive data.
             @Override
             public void onWaitingForAuthentication() {
                 storageResultCallback.onWaitingForAuthentication();
             }
 
+            // On successful authentication, store the encrypted sensitive data.
             @Override
             public void onSuccess(byte[] result) {
                 final File finalFileName = getFile(environmentDir,
@@ -67,6 +104,7 @@ public class SecureExternalFileHandler extends AbstractSecureFileHandler {
                 }
             }
 
+            // On un-successful authentication, set an error message.
             @Override
             public void onFailure(StorageResultErrorType storageResultErrorType) {
                 storageResultCallback.onFailure(storageResultErrorType);
@@ -74,14 +112,25 @@ public class SecureExternalFileHandler extends AbstractSecureFileHandler {
         });
     }
 
+    /**
+     * Reads the sensitive/non-sensitive data from external storage. Performs decryption
+     * in case of sensitive data before retrieving it.
+     *
+     * @param environmentDir the directory in the external storage
+     * @param storageReadObject the object to be read(retrieved)
+     * @param storageResultCallback the object to store the result
+     */
     public <S> void readData(final String environmentDir,
                              final StorageReadObject<S> storageReadObject,
                              final StorageResultCallback<S> storageResultCallback) {
+
+        // Check for the validity of environment directory to the external storage.
         if (!getContext().getExternalFilesDir(environmentDir).exists()) {
             storageResultCallback.onFailure(StorageResultErrorType.INVALID_ENVIRONMENT_DIR);
             return;
         }
 
+        // Determine if the object to be read is json or is encrypted or both.
         if (getFile(environmentDir,
                 storageReadObject.getSecureFile().getJsonEncryptedFileName()).exists()) {
             storageReadObject.getSecureFile().setJsonData(true);
@@ -93,6 +142,7 @@ public class SecureExternalFileHandler extends AbstractSecureFileHandler {
             storageReadObject.getSecureFile().setEncryptedData(true);
         }
 
+        // Prepare a byte[] to receive the byte stream of the object to be read.
         final File finalFileName = getFile(environmentDir,
                 storageReadObject.getSecureFile().getFinalFilename());
         byte[] objectAsBytes = new byte[(int) finalFileName.length()];
@@ -113,17 +163,22 @@ public class SecureExternalFileHandler extends AbstractSecureFileHandler {
 
         storageReadObject.setObjectBytes(objectAsBytes);
 
+        // Decrypt the data (if it is sensitive) and convert the byte stream to object.
         readObjFromBytes(storageReadObject, new StorageServiceCallback<S>() {
+
+            // Wait for authentication before retrieving sensitive data.
             @Override
             public void onWaitingForAuthentication() {
                 storageResultCallback.onWaitingForAuthentication();
             }
 
+            // On successful authentication, retrieve the decrypted sensitive data.
             @Override
             public void onSuccess(S result) {
                 storageResultCallback.onSuccess(new StorageResult<>(result));
             }
 
+            // On un-successful authentication, set an error message.
             @Override
             public void onFailure(StorageResultErrorType storageResultErrorType) {
                 storageResultCallback.onFailure(storageResultErrorType);

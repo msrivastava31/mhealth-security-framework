@@ -10,7 +10,12 @@ import android.arch.persistence.room.Update;
 import edu.uw.medhas.mhealthsecurityframework.acl.model.Resource;
 
 /**
- * Created by medhas on 2/18/19.
+ * This interface is the Resource Dao used to interact with the database.
+ * It contains methods to insert a resource, view a resource (by Id and name), update a resource
+ * and delete a resource.
+ *
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 @Dao
 public interface ResourceDao {

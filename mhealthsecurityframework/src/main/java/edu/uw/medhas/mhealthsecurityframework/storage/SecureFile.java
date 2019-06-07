@@ -1,12 +1,27 @@
 package edu.uw.medhas.mhealthsecurityframework.storage;
 
 /**
- * Created by medhas on 5/31/18.
+ * This class contains the metadata of the data to be stored/retrieved
+ * in/from cache/internal/external storage.
+ *
+ * @author Medha Srivastava
+ * Created on 5/18/18
  */
 
 public class SecureFile {
+    /**
+     * Name of the file where data is stored/retrieved
+     */
     private String mFilename;
+
+    /**
+     * Flag to hold true if data to be stored/retrieved is json.
+     */
     private boolean mIsJsonData;
+
+    /**
+     * Flag to hold true if data to be stored/retrieved is encrypted (only for sensitive data).
+     */
     private boolean mIsEncryptedData;
 
     public String getFilename() {

@@ -1,7 +1,10 @@
 package edu.uw.medhas.mhealthsecurityframework.acl.db;
 
 /**
- * Created by medhas on 2/22/19.
+ * This class has an enumeration containing Error codes and description.
+ *
+ * @author Medha Srivastava
+ * Created on 2/22/19.
  */
 
 public enum DbError {

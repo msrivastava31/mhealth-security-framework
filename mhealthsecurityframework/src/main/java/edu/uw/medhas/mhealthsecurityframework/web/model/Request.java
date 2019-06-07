@@ -4,7 +4,10 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Created by medhas on 2/17/19.
+ * This class represents the Request object and its characteristics.
+ *
+ * @author Medha Srivastava
+ * Created on 2/17/19.
  */
 
 public class Request {

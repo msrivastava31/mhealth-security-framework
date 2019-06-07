@@ -7,7 +7,11 @@ import java.time.Instant;
 import edu.uw.medhas.mhealthsecurityframework.acl.constants.DbConstants;
 
 /**
- * Created by medhas on 2/18/19.
+ * This is an abstract class which the other models extend.
+ * It maps to the four audit columns (created, created by, modified, modified by).
+ *
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 
 public abstract class AbstractAuditModel {

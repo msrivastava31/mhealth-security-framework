@@ -1,7 +1,10 @@
 package edu.uw.medhas.mhealthsecurityframework.web.model;
 
 /**
- * Created by medhas on 2/17/19.
+ * This class has an enumeration containing Error codes and description.
+ *
+ * @author Medha Srivastava
+ * Created on 2/17/19.
  */
 
 public class WebError extends Response {

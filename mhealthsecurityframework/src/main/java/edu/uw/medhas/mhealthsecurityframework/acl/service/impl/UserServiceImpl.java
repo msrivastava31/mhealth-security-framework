@@ -16,7 +16,11 @@ import edu.uw.medhas.mhealthsecurityframework.acl.service.PrivilegeService;
 import edu.uw.medhas.mhealthsecurityframework.acl.service.UserService;
 
 /**
- * Created by medhas on 2/20/19.
+ * This class implements the UserService interface.
+ * It contains methods to create a User and delete a User.
+ *
+ * @author Medha Srivastava
+ * Created on 2/20/19.
  */
 
 public class UserServiceImpl implements UserService {
@@ -28,8 +32,15 @@ public class UserServiceImpl implements UserService {
         mPrivilegeService = new PrivilegeServiceImpl(aclDb);
     }
 
+    /**
+     * Creates a user.
+     * @param user User to be created
+     * @param authContext details of the current user
+     * @param resultHandler listener to store the result of the query
+     */
     @Override
     public void createUser(final User user, final AuthContext authContext, final ResultHandler<User> resultHandler) {
+        // Check if the current user is authorized to perform this operation
         mPrivilegeService.isAllowed(authContext.getUserId(), DbConstants.USER_RESOURCE, DbConstants.CREATE_OP,
                 new ResultHandler<Boolean>() {
                     @Override
@@ -62,9 +73,17 @@ public class UserServiceImpl implements UserService {
         );
     }
 
+    /**
+     * Assigns a Role to a user.
+     * @param userId Id of the user
+     * @param roleName Name of the role
+     * @param authContext details of the current user
+     * @param resultHandler listener to store the result of the query
+     */
     @Override
     public void assignRoleToUser(final String userId, final String roleName, final AuthContext authContext,
                                  final ResultHandler<UserRole> resultHandler) {
+        // Check if the current user is authorized to perform this operation
         mPrivilegeService.isAllowed(authContext.getUserId(), DbConstants.USER_RESOURCE, DbConstants.UPDATE_OP,
                 new ResultHandler<Boolean>() {
                     @Override
@@ -110,8 +129,15 @@ public class UserServiceImpl implements UserService {
         );
     }
 
+    /**
+     * Deletes a user.
+     * @param userId Id of the user to be deleted
+     * @param authContext details of the current user
+     * @param resultHandler listener to store the result of the query
+     */
     @Override
     public void deleteUser(final String userId, final AuthContext authContext, final ResultHandler<Void> resultHandler) {
+        // Check if the current user is authorized to perform this operation
         mPrivilegeService.isAllowed(authContext.getUserId(), DbConstants.USER_RESOURCE, DbConstants.DELETE_OP,
                 new ResultHandler<Boolean>() {
                     @Override

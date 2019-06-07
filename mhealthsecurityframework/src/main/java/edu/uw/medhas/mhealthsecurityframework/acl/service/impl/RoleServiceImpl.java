@@ -14,7 +14,11 @@ import edu.uw.medhas.mhealthsecurityframework.acl.service.PrivilegeService;
 import edu.uw.medhas.mhealthsecurityframework.acl.service.RoleService;
 
 /**
- * Created by medhas on 2/20/19.
+ * This class implements the RoleService interface.
+ * It contains methods to create a Role and delete a Role.
+ *
+ * @author Medha Srivastava
+ * Created on 2/20/19.
  */
 
 public class RoleServiceImpl implements RoleService {
@@ -26,8 +30,15 @@ public class RoleServiceImpl implements RoleService {
         mPrivilegeService = new PrivilegeServiceImpl(aclDb);
     }
 
+    /**
+     * Creates a role.
+     * @param role role to be created
+     * @param authContext details of the current user
+     * @param resultHandler listener to store the result of the query
+     */
     @Override
     public void createRole(final Role role, final AuthContext authContext, final ResultHandler<Role> resultHandler) {
+        // Check if the current user is authorized to perform this operation
         mPrivilegeService.isAllowed(authContext.getUserId(), DbConstants.ROLE_RESOURCE, DbConstants.CREATE_OP,
                 new ResultHandler<Boolean>() {
                     @Override
@@ -61,8 +72,15 @@ public class RoleServiceImpl implements RoleService {
         );
     }
 
+    /**
+     * Deletes a role.
+     * @param roleName Name of role to be deleted
+     * @param authContext details of the current user
+     * @param resultHandler listener to store the result of the query
+     */
     @Override
     public void deleteRole(final String roleName, final AuthContext authContext, final ResultHandler<Void> resultHandler) {
+        // Check if the current user is authorized to perform this operation
         mPrivilegeService.isAllowed(authContext.getUserId(), DbConstants.ROLE_RESOURCE, DbConstants.DELETE_OP,
                 new ResultHandler<Boolean>() {
                     @Override

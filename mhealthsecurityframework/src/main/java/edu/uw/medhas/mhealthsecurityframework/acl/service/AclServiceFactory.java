@@ -26,7 +26,12 @@ import edu.uw.medhas.mhealthsecurityframework.acl.service.impl.RoleServiceImpl;
 import edu.uw.medhas.mhealthsecurityframework.acl.service.impl.UserServiceImpl;
 
 /**
- * Created by medhas on 2/20/19.
+ * This class is the ACL service Factory class and it creates the database and the root user,
+ * creates operations and assigns various privileges to the root user. It also inserts values
+ * in various tables in the databse.
+ *
+ * @author Medha Srivastava
+ * Created on 2/20/19.
  */
 
 public class AclServiceFactory {
@@ -115,6 +120,10 @@ public class AclServiceFactory {
         }
     }
 
+    /**
+     * Public static method to create a single instance of this class.
+     * @param context
+     */
     public static void init(Context context) {
         if (INSTANCE == null) {
             INSTANCE = new AclServiceFactory(context);

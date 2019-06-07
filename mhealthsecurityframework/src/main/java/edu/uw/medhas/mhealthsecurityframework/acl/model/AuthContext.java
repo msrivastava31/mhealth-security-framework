@@ -3,7 +3,11 @@ package edu.uw.medhas.mhealthsecurityframework.acl.model;
 import edu.uw.medhas.mhealthsecurityframework.acl.constants.DbConstants;
 
 /**
- * Created by medhas on 2/18/19.
+ * This class contains the details of the current user. It has the current user Id and the current user context
+ * used to check authorization of the user while performing an operation.
+ *
+ * @author Medha Srivastava
+ * Created on 2/18/19.
  */
 
 public class AuthContext {
